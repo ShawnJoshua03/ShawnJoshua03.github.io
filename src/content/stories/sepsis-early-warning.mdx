@@ -70,7 +70,13 @@ Three decisions did most of the work:
 
 </div>
 
-The threshold picked by cross-validation, 0.32, landed at the peak of the test utility curve, so the tuning generalized instead of overfitting. <span class="todo">TODO(shawn): export the utility-vs-threshold curve points (from test_predictions.csv) so this paragraph gets its chart.</span>
+The threshold picked by cross-validation, 0.32, landed at the peak of the test utility curve, so the tuning generalized instead of overfitting.
+
+<figure class="chart">
+  <figcaption class="title">Choosing where the alarm goes off</figcaption>
+  <img src="/images/sepsis-utility.webp" width="960" height="480" alt="Line chart of normalized challenge utility on the 4,441 held-out patients across alert thresholds from 0.05 to 0.8. Utility climbs from about minus 0.1, peaks at 0.423 at the threshold of 0.32 chosen by cross-validation, then falls to about 0.16 at 0.8." loading="lazy" />
+  <p class="source">Source: docs/utility_vs_threshold.png in the project repository.</p>
+</figure>
 
 <SepsisTradeoff />
 
