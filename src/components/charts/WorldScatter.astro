@@ -1,0 +1,48 @@
+---
+import { scaleLog, scaleLinear } from 'd3-scale';
+import data from '../../data/world-health-wealth.json';
+import { SIZES } from '../../lib/chart';
+
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+
+const pts = data.points;
+// Direct labels for a few countries instead of a legend.
+const LABELS: Record<string, { name: string; dx: number; dy: number; anchor: 'start' | 'end' | 'middle' }> = {
+  JPN: { name: 'Japan', dx: -8, dy: -6, anchor: 'end' },
+  ARE: { name: 'UAE', dx: -6, dy: 24, anchor: 'end' },
+  QAT: { name: 'Qatar', dx: 4, dy: -12, anchor: 'end' },
+  CAF: { name: 'Central African Rep.', dx: 10, dy: 4, anchor: 'start' },
+};
+const charts = SIZES.map((s) => {
+  const m = { t: 24, r: 14, b: 40, l: 34 };
+  const h = s.key === 'sm' ? 280 : 320;
+  const x = scaleLog().domain([400, 160000]).range([m.l, s.w - m.r]);
+  const y = scaleLinear().domain([15, 90]).range([h - m.b, m.t]);
+  return { s, m, h, x, y };
+});
+const label = `Scatter plot of ${pts.length} countries: GDP per person on a log scale against life expectancy at birth, 2022. Richer countries cluster at higher life expectancy. Japan is highest at 84.1 years; the Central African Republic is recorded at 18.8 years.`;
+---
+<figure class="chart">
+  <figcaption class="title">Wealth and health, {pts.length} countries</figcaption>
+  {!compact && <p class="sub">GDP per person against life expectancy at birth, 2022. One dot per country.</p>}
+  {charts.map(({ s, m, h, x, y }) => (
+    <svg class={s.key} viewBox={`0 0 ${s.w} ${h}`} role="img" aria-label={label} font-size={s.font}>
+      <g class="grid">{[20, 40, 60, 80].map((t) => <line x1={m.l} x2={s.w - m.r} y1={y(t)} y2={y(t)} />)}</g>
+      {[20, 40, 60, 80].map((t) => <text x={m.l - 6} y={y(t) + 4} text-anchor="end">{t}</text>)}
+      <text x={m.l - 6} y={m.t - 10} text-anchor="end">years</text>
+      <line class="baseline" x1={m.l} x2={s.w - m.r} y1={h - m.b} y2={h - m.b} />
+      {[1000, 10000, 100000].map((t) => <text x={x(t)} y={h - m.b + 16} text-anchor="middle">${t >= 1000 ? `${t / 1000}k` : t}</text>)}
+      <text x={s.w - m.r} y={h - 4} text-anchor="end">GDP per person, log scale</text>
+      {pts.map((p) => (
+        <circle cx={x(p.gdp)} cy={y(p.life)} r={LABELS[p.code] ? 4.5 : 3} class={LABELS[p.code] ? 'dot' : undefined}
+          style={LABELS[p.code] ? undefined : 'fill: var(--ink-3); opacity: 0.55'} />
+      ))}
+      {pts.filter((p) => LABELS[p.code]).map((p) => {
+        const l = LABELS[p.code];
+        return <text x={x(p.gdp) + l.dx} y={y(p.life) + l.dy} text-anchor={l.anchor} class="t-strong halo">{l.name} {p.life}</text>;
+      })}
+    </svg>
+  ))}
+  <p class="source">Source: Our World in Data, 2022, as cleaned for the World of Data dashboard (world_data.csv). The Central African Republic value matches the published OWID figure for 2022.</p>
+</figure>

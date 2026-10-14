@@ -1,0 +1,54 @@
+---
+import { scaleLinear } from 'd3-scale';
+import { SIZES } from '../../lib/chart';
+
+// From the Concert Radar README: rank_score = 50 - list_index, weighted 3/2/1
+// across Spotify's three time ranges, then scaled so 300 points = 100.
+const weights = [
+  { range: 'Last ~4 weeks', w: 3 },
+  { range: 'Last ~6 months', w: 2 },
+  { range: 'All time', w: 1 },
+];
+const examples = [
+  { label: '#1 in all three ranges', v: 100 },
+  { label: '#1 in the last month only', v: 50 },
+  { label: '#1 all time only', v: 16.7 },
+];
+const charts = SIZES.map((s) => {
+  const labelW = s.key === 'sm' ? 112 : 130;
+  const wx = scaleLinear().domain([0, 3]).range([0, s.w - labelW - 40]);
+  const sx = scaleLinear().domain([0, 100]).range([0, s.w - 44]);
+  const top = 128;
+  const rowH = 40;
+  return { s, labelW, wx, sx, top, rowH, h: top + examples.length * rowH + 4 };
+});
+const label = 'Concert Radar affinity weights: last 4 weeks counts 3 times, last 6 months twice, all time once. Example scores out of 100: number one in all three ranges scores 100, number one in the last month only scores 50, number one all time only scores 16.7.';
+---
+<figure class="chart">
+  <figcaption class="title">How an artist earns a spot at the top</figcaption>
+  {charts.map(({ s, labelW, wx, sx, top, rowH, h }) => (
+    <svg class={s.key} viewBox={`0 0 ${s.w} ${h}`} role="img" aria-label={label} font-size={s.font}>
+      <text x="0" y="12" class="t-strong">Weight by listening window</text>
+      {weights.map((r, i) => (
+        <g>
+          <text x="0" y={40 + i * 26}>{r.range}</text>
+          <rect class="bar" x={labelW} y={29 + i * 26} width={wx(r.w)} height="15" />
+          <text x={labelW + wx(r.w) + 8} y={41 + i * 26} class="t-accent">x{r.w}</text>
+        </g>
+      ))}
+      <text x="0" y={top - 12} class="t-strong">Resulting score, out of 100</text>
+      {examples.map((e, i) => {
+        const y0 = top + i * rowH;
+        return (
+          <g>
+            <text x="0" y={y0 + 10}>{e.label}</text>
+            <rect class="track" x="0" y={y0 + 17} width={sx(100)} height="10" />
+            <rect class="bar" x="0" y={y0 + 17} width={sx(e.v)} height="10" />
+            <text x={sx(100) + 8} y={y0 + 27} class="t-accent">{e.v}</text>
+          </g>
+        );
+      })}
+    </svg>
+  ))}
+  <p class="source">Source: Concert Radar README. Score = sum of (50 minus list position) x weight, divided by 300.</p>
+</figure>

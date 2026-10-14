@@ -1,0 +1,53 @@
+{
+ "source": "Shrinkflation Sleuth dataset (data/processed). Size change per FullCarts.org; prices are representative, not live quotes.",
+ "product": "Doritos Nacho Cheese Tortilla Chips",
+ "alert": {
+  "old_size": 9.75,
+  "new_size": 9.25,
+  "size_unit": "oz",
+  "old_price": 4.99,
+  "new_price": 4.99,
+  "shrinkage_pct": 5.1,
+  "effective_price_increase_pct": 5.4,
+  "date_changed": "2022-03-15",
+  "source": "FullCarts.org",
+  "verified": true
+ },
+ "history": [
+  {
+   "record_date": "2020-03-15",
+   "size": 9.75,
+   "price": 4.79,
+   "price_per_unit": 0.4913,
+   "source": "retail price capture"
+  },
+  {
+   "record_date": "2021-03-15",
+   "size": 9.75,
+   "price": 4.99,
+   "price_per_unit": 0.5118,
+   "source": "retail price capture"
+  },
+  {
+   "record_date": "2022-03-15",
+   "size": 9.25,
+   "price": 4.99,
+   "price_per_unit": 0.5395,
+   "source": "FullCarts.org"
+  },
+  {
+   "record_date": "2023-03-15",
+   "size": 9.25,
+   "price": 5.09,
+   "price_per_unit": 0.5503,
+   "source": "retail price capture"
+  },
+  {
+   "record_date": "2026-05-15",
+   "size": 9.25,
+   "price": 5.19,
+   "price_per_unit": 0.5611,
+   "source": "retail price capture"
+  }
+ ]
+}

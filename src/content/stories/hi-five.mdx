@@ -1,0 +1,64 @@
+---
+title: 'Hi-Five'
+tagline: 'Matches people on personality, not just shared tags, using OCEAN embeddings in a Neo4j graph.'
+areas: [ai, software]
+headline: App Matches People on Personality, Not Just Shared Tags
+deck: Built over a weekend at SASEHack with two teammates. Free-text answers for each of the five OCEAN traits become embeddings, and matches weigh personality 60 to 40 over shared interests.
+kicker: Social · Machine Learning
+date: 2024-10-01
+dateline: Cincinnati
+excerpt: Most matching apps compare tags and interests. Hi-Five also compares personalities, embedding a five-trait OCEAN personality test with bge-en-icl and ranking matches in a Neo4j graph.
+stack: [Next.js, TypeScript, Python, Flask, Neo4j, BAAI/bge-en-icl, Hugging Face]
+metrics:
+  - { value: '5', label: 'OCEAN traits, each embedded from a free-text answer', source: Project code }
+  - { value: '60 : 40', label: 'Weight of personality similarity versus shared interest tags', source: Project code }
+  - { value: '3', label: 'Teammates at SASEHack', source: GitHub contributors }
+  - { value: 3 days, label: 'From first commit to last, October 4 to 7, 2024', source: GitHub }
+links:
+  code: https://github.com/Rai1975/SASEHackProject
+rank: { all: 6, eng: 5, ai: 3, product: 11 }
+---
+
+## The Problem
+
+Modern matching apps compare tags and interest metrics. Two people who both list "hiking" match; two people who would actually get along may not. Hi-Five adds the missing signal: personality.
+
+## What I Built
+
+A matching app built at SASEHack in October 2024 with two teammates. New users take a personality test based on the OCEAN model (openness, conscientiousness, extraversion, agreeableness, neuroticism) and pick interest tags. Hi-Five turns the answers into embeddings, stores everyone in a Neo4j graph, and suggests people with similar personalities and interests. From there users can swipe, send friend requests and chat.
+
+My commits covered the Next.js frontend, login and interest tags, the API endpoints, and chat.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Personality test</b><span>One free-text answer per OCEAN trait.</span></li>
+  <li><b>Embed</b><span>Each answer is embedded with BAAI/bge-en-icl, giving five trait vectors per person.</span></li>
+  <li><b>Graph</b><span>People, tags and friendships live in Neo4j.</span></li>
+  <li><b>Score</b><span>For each candidate: the cosine similarity of each trait vector, averaged across the five traits, weighted 0.6, plus the Jaccard similarity of interest tags, weighted 0.4.</span></li>
+  <li class="out"><b>Suggest</b><span>The highest-scoring candidates come back as suggested matches.</span></li>
+</ol>
+
+## Results
+
+A working end-to-end app at the end of the hackathon: personality test, embeddings, graph-based matching, swiping, friend requests and chat. <span class="todo">TODO(shawn): any placement or judging result from SASEHack.</span>
+
+## Limitations
+
+<div class="corrections">
+<span class="label">Correction</span>
+
+An earlier version of my resume described a professional matching platform that combined embeddings with emotion classification (roberta-base-go-emotions). The public code matches on OCEAN personality embeddings and shared interest tags. It contains no emotion classifier.
+
+</div>
+
+- **Untested weights.** The 0.6 and 0.4 weights are fixed in code. Nothing in the repository measures match quality.
+- **A thin personality signal.** Five free-text answers stand in for a validated personality inventory.
+- **Hackathon code.** The embedding server address is hard-coded, and the repository README is the default template.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Measure match quality</strong>, even with a small survey of whether suggested matches actually talked, and tune the weights against it.</li>
+  <li><strong>Use a validated personality inventory</strong> instead of five free-text prompts.</li>
+</ol>

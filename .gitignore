@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.claude-flow/
+screenshots/
+.env
+.env.*
+
+# Source documents stay private. Only the redacted copy in public/ ships.
+/Shawn_Lasrado_Resume_2026.pdf
+/linkedin_profile.pdf

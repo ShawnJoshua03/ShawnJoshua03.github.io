@@ -1,0 +1,85 @@
+---
+title: 'Concert Radar'
+tagline: 'Concerts near you, ranked by how much you actually listen to each artist.'
+areas: [software]
+headline: Your Concert Feed, Ranked by What You Actually Play
+deck: A FastAPI and D3 app turns Spotify listening history into a ranked list of shows within 50 miles. A fuzzy matcher removes most tribute bands. Its accuracy is unmeasured, and the README says so.
+kicker: Music · Full Stack
+date: 2026-05-01
+dateline: Cincinnati
+excerpt: Ticketing sites sort shows by date or distance. Concert Radar sorts them by how much you listen to each artist, using a rank-based affinity score across three Spotify time ranges.
+lede:
+  - Ticketing sites list shows by date or distance. Concert Radar lists them by the artists you actually play, so the shows you would care about most sit at the top.
+  - It pulls your top 50 artists across three Spotify time ranges, weights recent listening 3 to 1 over all-time favorites, then searches Ticketmaster for your top 20 within 50 miles. The backend is FastAPI on PostgreSQL with Spotify OAuth and per-user caching, covered by 39 tests that need neither a network nor a database.
+stack: [Python 3.12, FastAPI, Pydantic v2, PostgreSQL (Supabase), Spotify OAuth, JWT, Ticketmaster Discovery API, OpenStreetMap Nominatim, D3.js v7, pytest, ruff, GitHub Actions, Render, GitHub Pages]
+metrics:
+  - { value: '39', label: 'Tests covering scoring, matching, auth and caching, with no network or database', source: README }
+  - { value: '3 : 2 : 1', label: 'Weights for the last month, six months and all time', source: README }
+  - { value: '20', label: 'Top artists searched on Ticketmaster per user', source: README }
+  - { value: 50 mi, label: 'Search radius around your city', source: README }
+  - { value: 6 h, label: 'Per-user concert cache', source: README }
+  - { value: ~40 KB, label: 'Size of the live demo, plus D3 from a CDN', source: README }
+links:
+  demo: https://shawnjoshua03.github.io/concert-radar/
+  code: https://github.com/ShawnJoshua03/concert-radar
+rank: { all: 2, eng: 1, ai: 6, product: 8 }
+chart: affinity
+---
+
+## The Problem
+
+Ticketing sites list shows by date or distance. I wanted a list sorted by the artists I actually play, so the shows I would care about most would be at the top.
+
+## What I Built
+
+A full-stack web app. You log in with Spotify, set your city, and get a feed of upcoming concerts within 50 miles, ranked by how much you listen to each artist. A D3 chart shows the affinity scores behind the ranking.
+
+The full flow runs locally: Spotify login, sync, scoring, Ticketmaster search and the ranked feed. The public link is a demo that runs in the browser on made-up artists and shows, scored by the same formula the backend uses. No account needed.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Spotify sync</b><span>The backend fetches your top 50 artists for three time ranges: about the last 4 weeks, the last 6 months, and all time.</span></li>
+  <li><b>Affinity score, 0 to 100</b><span>Spotify returns ranked lists, not play counts, so the score is rank-based: 50 points for #1 down to 1 for #50, weighted 3, 2 and 1 by recency, divided by the 300-point maximum.</span></li>
+  <li><b>Ticketmaster search</b><span>For your top 20 artists, search music events within 50 miles. Your city becomes coordinates through OpenStreetMap Nominatim.</span></li>
+  <li><b>Fuzzy matching</b><span>A keyword search also returns tribute acts and festivals. Comparing the artist against each event's listed performers with difflib throws most of them out, with a stricter threshold when only the title is available.</span></li>
+  <li class="out"><b>Ranked feed</b><span>Sorted by affinity, then by date. Cached per user for 6 hours.</span></li>
+</ol>
+
+Three engineering choices worth explaining:
+
+- **Bearer tokens instead of cookies.** The frontend is on GitHub Pages and the API on Render. Browsers increasingly block cross-site cookies, so the session travels as a JWT in the Authorization header.
+- **One fetch function made the demo cheap.** Every request already went through `apiFetch()`. Demo mode swaps what that one function calls and leaves the rendering code alone, so the demo runs the same UI as the real app.
+- **All SQL in one module.** Since every connection comes from `get_db()`, the tests swap in a fake that records queries. That is why 39 tests finish in about a second with no network.
+
+## Results
+
+The full app works end to end locally. GitHub Actions runs the test suite and `ruff` on every push, and publishes the demo to GitHub Pages. The demo is about 40 KB of HTML, CSS and JavaScript and works on phone-sized screens.
+
+## Limitations
+
+<div class="corrections">
+<span class="label">Correction</span>
+
+The first version cached shows by artist, for everyone. Two users in different cities who liked the same artist saw each other's local shows, and changing your city deleted cached shows for other users. The cache now lives at the user level.
+
+A second bug hid behind the first: a city with no matching shows left no cached rows, so every page load searched Ticketmaster again. The app now stores when each user's concerts were last fetched instead of inferring it from the rows.
+
+Spotify access tokens last an hour, and nothing called the refresh endpoint, so sync failed an hour after login. Sync now refreshes the token when it is within a minute of expiring.
+
+</div>
+
+- **Matcher accuracy is unmeasured.** Its thresholds (0.70 for attraction names, 0.82 for event titles) were tuned by hand on real searches. There is no labelled dataset.
+- **Spotify Development Mode** only lets users added in the developer dashboard log in, which is why the public link is a demo.
+- **Ticketmaster only.** AXS, Dice, Eventbrite and many small venues are missing. The 20 artist searches run one after another to stay under the free-tier rate limit, so the first uncached load takes a few seconds.
+- **Not production security.** Spotify tokens are stored unencrypted, the session JWT lives in `localStorage`, and OAuth state is kept in process memory, so the backend must run as a single worker.
+- **The tests never run real SQL.** The fake database means a typo in a query would only show up against a real Postgres.
+- **Free-tier hosting.** Render sleeps when idle, so the first request takes about a minute, and Supabase pauses free projects after a week without activity.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Label a few hundred real search results</strong> and measure the matcher, so the thresholds stop being a guess.</li>
+  <li><strong>Move OAuth state and tokens into the database</strong>, encrypted, so the API can run more than one worker.</li>
+  <li><strong>Run the test suite against a real Postgres in CI</strong>, so the SQL gets tested along with everything else.</li>
+</ol>

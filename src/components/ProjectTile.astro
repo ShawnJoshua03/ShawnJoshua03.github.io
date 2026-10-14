@@ -1,0 +1,59 @@
+---
+import { render } from 'astro:content';
+import Chart from './charts/Chart.astro';
+import { focusHooks, monthYear, type Project } from '../lib/projects';
+
+interface Props { project: Project; all: Project[] }
+const { project, all } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+const hooks = focusHooks(project, all);
+const IMAGES: Record<string, { src: string; alt: string; w: number; h: number }> = {
+  gcs: {
+    src: '/images/gcs-model.webp', w: 640, h: 480,
+    alt: 'A 3D plot of a printed ring rebuilt from G-code, colored from purple at the bottom layers to yellow at the top.',
+  },
+};
+const image = IMAGES[project.id];
+---
+<article class:list={['project', 'reveal', ...hooks.classes]} style={hooks.style} id={project.id} aria-labelledby={`${project.id}-t`}>
+  <div class="main">
+    <p class="cat">{d.kicker} · {monthYear(d.date)}</p>
+    <h3 id={`${project.id}-t`}>{d.title}</h3>
+    <p class="tagline">{d.tagline}</p>
+    {d.award && <span class="award">{d.award}</span>}
+    {d.metrics.length > 0 && (
+      <dl class="stats">
+        {d.metrics.slice(0, 4).map((m, i) => (
+          <div class:list={{ extra: i >= 2 }}><dt>{m.value}</dt><dd>{m.label}</dd></div>
+        ))}
+      </dl>
+    )}
+    <p class="stack">{d.stack.slice(0, 6).join(' · ')}</p>
+    <div class="links">
+      {d.links.demo && <a class="btn primary" href={d.links.demo}>Live demo</a>}
+      {d.links.code && <a class="btn" href={d.links.code}>Code</a>}
+    </div>
+  </div>
+
+  <div class="viz" aria-hidden={d.chart || image ? undefined : 'true'}>
+    {d.chart
+      ? <Chart name={d.chart} compact />
+      : image
+        ? <img src={image.src} width={image.w} height={image.h} alt={image.alt} loading="lazy" decoding="async" />
+        : (
+          <div class="viz-numbers">
+            {d.metrics.slice(0, 4).map((m) => <div><b>{m.value}</b><span>{m.label}</span></div>)}
+          </div>
+        )}
+  </div>
+
+  <details class="more details-row">
+    <summary>Full write-up</summary>
+    <div class="story-body">
+      <p class="lead-in">{d.deck}</p>
+      <Content />
+    </div>
+    <a class="permalink" href={`/stories/${project.id}/`}>Open as its own page</a>
+  </details>
+</article>

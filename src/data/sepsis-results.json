@@ -1,0 +1,27 @@
+{
+ "source": "sepsis-early-warning/artifacts/clinical_report.json and metrics.json",
+ "clinical": {
+  "normalized_utility": 0.4235,
+  "auroc": 0.8168,
+  "auprc": 0.0921,
+  "threshold": 0.32,
+  "septic_patients": 398,
+  "septic_detected_in_window": 370,
+  "detection_rate": 0.93,
+  "median_lead_time_hours": 12.0,
+  "septic_with_alarm_before_window": 271,
+  "nonseptic_patients": 4043,
+  "nonseptic_patients_alarmed": 2381,
+  "nonseptic_alarm_rate": 0.589
+ },
+ "metrics": {
+  "test_auroc": 0.8168,
+  "test_auprc": 0.0921,
+  "threshold": 0.32,
+  "cv_utility": 0.3738,
+  "train_utility_in_sample": 0.6749,
+  "test_normalized_utility": 0.4235,
+  "n_train_patients": 13321,
+  "n_test_patients": 4441
+ }
+}

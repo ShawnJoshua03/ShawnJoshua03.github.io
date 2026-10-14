@@ -1,0 +1,99 @@
+---
+title: 'Sepsis Early Warning'
+tagline: 'Flags 93% of septic ICU patients a median 12 hours before onset, and reports the false alarms too.'
+areas: [ai, software]
+headline: Model Warns of Sepsis a Median 12 Hours Before Onset
+deck: On 4,441 patients it never saw in training, it flagged 93% of septic cases in time. It also alarmed on 59% of the patients who were fine, which is the number most launch posts would leave out.
+kicker: Health · Machine Learning
+date: 2026-07-01
+dateline: Cincinnati
+excerpt: An hourly ICU early-warning model trained on real PhysioNet 2019 Challenge data, scored with the Challenge's official utility metric, and published with its false-alarm rate on the same page.
+lede:
+  - An hourly ICU early-warning model, trained on real PhysioNet 2019 Challenge data, flagged 370 of 398 septic patients inside the window the official metric rewards. Among those it caught, the median warning came 12 hours before clinical onset.
+  - The same model alarmed at least once for 2,381 of 4,043 patients who never developed sepsis. Both numbers come from 4,441 held-out patients, split by patient so no ICU stay appears in both training and test. The threshold was tuned out-of-fold, and the leakage checks are unit tests.
+stack: [Python 3.13, pandas, scikit-learn, FastAPI, Pydantic, pytest, ruff, Docker, GitHub Actions, GitHub Pages]
+metrics:
+  - { value: '0.424', label: 'Normalized utility on held-out patients (official Challenge metric)', source: README }
+  - { value: '93%', label: 'Septic patients flagged in the useful window (370 of 398)', source: README }
+  - { value: 12 h, label: 'Median warning before onset, among those flagged', source: README }
+  - { value: '0.817', label: 'Hourly AUROC (AUPRC 0.092)', source: README }
+  - { value: '4,441', label: 'Held-out patients, never seen in training', source: README }
+  - { value: '59%', label: 'Patients without sepsis who got at least one alarm (2,381 of 4,043)', source: README }
+links:
+  demo: https://shawnjoshua03.github.io/sepsis-early-warning/
+  code: https://github.com/ShawnJoshua03/sepsis-early-warning
+rank: { all: 1, eng: 3, ai: 1, product: 9 }
+chart: sepsis-risk
+---
+import SepsisTradeoff from '../../components/charts/SepsisTradeoff.astro';
+
+## The Problem
+
+Every hour in an intensive care unit brings new vitals and labs. The PhysioNet/Computing in Cardiology Challenge 2019 asked a precise question about that stream: given everything recorded about a patient up to this hour, should the bedside get a sepsis warning now?
+
+The Challenge's own utility metric encodes the clinical trade-off. It rewards warnings 6 to 12 hours before onset, penalizes late or missed cases heavily, and charges a small cost for every false alarm. I scored against that metric directly instead of a proxy, because an hourly AUROC says nothing about whether an alert arrives in time.
+
+## What I Built
+
+A gradient-boosting model that scores every ICU hour for every patient. When the hourly risk crosses 0.32, the alert fires. I trained it on 13,321 patients from the Challenge's training set A and held out 4,441 more, split by patient, for the final test.
+
+Around the model sits the usual plumbing, done carefully: a FastAPI service with a validated `POST /score` endpoint, a Docker image, CI that runs lint, tests and a container smoke test on every push, and a static demo that replays seven held-out patients hour by hour. Every score on the demo comes from the committed model, through the same validation and feature code as the API.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>load.py</b><span>Reads the Challenge's per-patient .psv files: one row per ICU hour, 40 columns.</span></li>
+  <li><b>features.py</b><span>Builds causal time-series features. Every feature at hour t uses data up to t only: forward-fills, rolling and expanding windows, plus "measured this hour" and "hours since last measured" flags, because when a clinician orders a lab is itself a signal.</span></li>
+  <li><b>train.py</b><span>Patient-grouped train/test split and CV folds. Tunes the alert threshold on 3-fold out-of-fold predictions, not on the model's own training scores.</span></li>
+  <li><b>evaluate.py</b><span>Official Challenge utility (the organizers' code, vendored), AUROC/AUPRC, and a lead-time report that only counts alerts inside the rewarded window.</span></li>
+  <li class="out"><b>app.py and the demo</b><span>FastAPI scorer at POST /score. At build time, each demo patient is sent through the real endpoint and the responses ship with the static page.</span></li>
+</ol>
+
+Three decisions did most of the work:
+
+- **Leakage is tested, not trusted.** A unit test appends and corrupts future hours, then checks that every earlier feature is unchanged. In clinical time series, leakage hides in the plumbing. Writing that test was cheaper than auditing every feature by hand.
+- **The threshold is tuned out-of-fold.** In-sample utility was 0.67 against 0.42 on test. Tuning on in-sample scores would have picked a threshold for overconfident predictions.
+- **Lead time is counted honestly.** An alarm 30 hours before onset is not early detection; it fired before anything predictive was observable. Those alarms are reported separately instead of padding the average.
+
+## Results
+
+<div class="table-wrap">
+
+| Metric, 4,441 held-out patients | Value |
+|---|---|
+| Normalized utility (official Challenge metric) | **0.424** |
+| AUROC / AUPRC (hourly) | 0.817 / 0.092 |
+| Septic patients flagged in the useful window (12 h before to 3 h after onset) | 370 / 398 (93%) |
+| Median warning before onset, among those flagged | 12 h |
+| Patients without sepsis with at least one alarm | 2,381 / 4,043 (59%) |
+| Septic patients who also alarmed before the useful window | 271 / 398 (68%) |
+
+</div>
+
+The threshold picked by cross-validation, 0.32, landed at the peak of the test utility curve, so the tuning generalized instead of overfitting. <span class="todo">TODO(shawn): export the utility-vs-threshold curve points (from test_predictions.csv) so this paragraph gets its chart.</span>
+
+<SepsisTradeoff />
+
+The last two bars are the cost of the first one. They belong in the same chart.
+
+## Limitations
+
+<div class="corrections">
+<span class="label">Correction</span>
+
+An earlier version of my resume compared its score with the Challenge leaderboard, where the best official entries scored about 0.36. That comparison does not hold. Those entries were scored on hidden test sets that included a hospital no team had data from. This result is an internal split of a single hospital system, which is a much easier setting.
+
+</div>
+
+- **High alarm burden.** At the utility-optimal threshold, most patients without sepsis alarm at least once during their stay. The metric charges only 0.05 per false-positive hour, so it tolerates this. A real deployment would need alert suppression or a stricter threshold.
+- **Partial training data.** Trained on 17,762 of the 20,336 patients in training set A. Training set B, the second hospital, was not used.
+- **A strong baseline, not the state of the art.** Leading approaches add sequence models and per-hospital calibration. These probabilities are not calibrated.
+- **Research demo only.** Not a medical device and not validated for clinical use. The demo replays de-identified Challenge patients and stores nothing.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Train on hospital A, test on hospital B.</strong> That is the honest external-validation experiment, and the number I would most like to see.</li>
+  <li><strong>Add alert suppression or a stricter threshold</strong>, then report the alarm burden again next to the detection rate.</li>
+  <li><strong>Try sequence models and per-hospital calibration</strong>, the approach the leading entries used, and keep this model as the baseline to beat.</li>
+</ol>

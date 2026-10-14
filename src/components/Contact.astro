@@ -1,0 +1,22 @@
+---
+import { SITE } from '../config';
+const year = new Date().getFullYear();
+---
+<footer class="contact" id="contact" aria-labelledby="contact-h">
+  <div class="wrap">
+    <p class="eyebrow">Contact</p>
+    <h2 id="contact-h">Available December 2026.</h2>
+    <p class="lede">Forecast: 100% chance of availability. Software, AI and data, or product roles, anywhere in the U.S. or remote.</p>
+    <div class="btn-row">
+      <a class="btn primary" href={`mailto:${SITE.email}`}>Email me</a>
+      <a class="btn" href={SITE.linkedin} rel="me">LinkedIn</a>
+      <a class="btn" href={SITE.github} rel="me">GitHub</a>
+      <a class="btn" href={SITE.resumePdf} download>Resume PDF</a>
+    </div>
+    <a class="mail" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    <div class="colophon">
+      <span>&copy; {year} {SITE.name}. {SITE.motto}</span>
+      <span><a href="/resume/">Resume as a web page</a></span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,113 @@
+---
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/newsreader/wght.css';
+import '@fontsource-variable/newsreader/wght-italic.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import frauncesWoff2 from '@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url';
+import newsreaderWoff2 from '@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2?url';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/home.css';
+import '../styles/story.css';
+import Contact from '../components/Contact.astro';
+import { SITE } from '../config';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  /** Keep this page out of search results (used by the 404 page). */
+  noindex?: boolean;
+}
+const { title, description, ogImage = '/og/front.png', noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+  { href: '/#projects', label: 'Projects' },
+  { href: '/#experience', label: 'Experience' },
+  { href: '/#leadership', label: 'Leadership' },
+  { href: '/#about', label: 'About' },
+  { href: '/#contact', label: 'Contact' },
+];
+---
+<!doctype html>
+<html lang="en" class:list={{ dev: SITE.showTodos }}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={frauncesWoff2} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={newsreaderWoff2} as="font" type="font/woff2" crossorigin />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15171b" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      // Before first paint: saved theme, and the project focus from the URL.
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || t === 'light') d.dataset.theme = t;
+        } catch (e) {}
+        var f = new URLSearchParams(location.search).get('focus');
+        if (f === 'software' || f === 'ai' || f === 'product') d.dataset.focus = f;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="wordmark" href="/">{SITE.name}</a>
+        <nav class="site-nav" aria-label="Sections">
+          {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+        </nav>
+        <div class="header-actions">
+          <a class="btn primary" href={SITE.resumePdf} download>Resume</a>
+          <button class="icon-btn theme-toggle" type="button" aria-label="Switch light or dark theme" aria-pressed="false">
+            <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" /></svg>
+            <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" /></svg>
+          </button>
+          <details class="menu">
+            <summary aria-label="Menu">Menu</summary>
+            <nav aria-label="Sections, mobile">
+              {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+            </nav>
+          </details>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <Contact />
+    <script>
+      const root = document.documentElement;
+      const btn = document.querySelector<HTMLButtonElement>('.theme-toggle');
+      btn?.addEventListener('click', () => {
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        const next = dark ? 'light' : 'dark';
+        root.dataset.theme = next;
+        btn.setAttribute('aria-pressed', String(next === 'dark'));
+        try { localStorage.setItem('theme', next); } catch {}
+      });
+      // Close the mobile menu after choosing a section.
+      document.querySelectorAll<HTMLAnchorElement>('.menu nav a').forEach((a) =>
+        a.addEventListener('click', () => a.closest('details')?.removeAttribute('open')),
+      );
+    </script>
+  </body>
+</html>

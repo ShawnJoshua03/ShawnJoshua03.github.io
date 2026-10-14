@@ -1,0 +1,57 @@
+---
+title: 'FRIP'
+tagline: 'Fractional rental investing: pooled ownership, proportional payouts and a five-factor risk score.'
+areas: [software, product]
+headline: Platform Lets Investors Split a Rental Property, and the Rent Checks
+deck: FRIP pools money into properties and pays out rental income in proportion to ownership. Flask, MongoDB, a five-factor risk score, and a respectful number of decimal places.
+kicker: Fintech · Full Stack
+date: 2026-04-01
+dateline: Cincinnati
+excerpt: A full-stack app where users pool money to invest in rental properties. Ownership shares recalculate across every investor in real time, payouts follow the shares, and each property carries a 0 to 100 risk score.
+stack: [Python 3.12, Flask 3.0, MongoDB (PyMongo), bcrypt, vanilla JavaScript, Chart.js 4, Vercel]
+metrics:
+  - { value: '5', label: 'Factors in the 0 to 100 risk score', source: backend/risk.py }
+  - { value: '10', label: 'API endpoints across auth, properties, investments, valuations, portfolio and payouts', source: backend/routes.py }
+  - { value: '5', label: 'MongoDB collections', source: backend/db.py }
+links:
+  code: https://github.com/ShawnJoshua03/FRIP
+rank: { all: 7, eng: 7, ai: 11, product: 4 }
+---
+
+## The Problem
+
+Fractional ownership lets many people pool money into one rental property. It only works if every investor can see what they own, what it earns and how risky it is, and if the payouts are exactly right.
+
+## What I Built
+
+FRIP, the Fractional Rental Investment Platform. Users register, browse properties with their funding progress, expected returns and monthly income, and invest. Every investment recalculates ownership shares across all investors in that property. An admin action distributes rental income to every shareholder in proportion to their stake.
+
+A dashboard shows each user's allocation as a doughnut chart, their holdings, transaction history, and a time-weighted return on their portfolio. The frontend is a single-page app with client-side routing and no full-page reloads.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Auth</b><span>Flask sessions with bcrypt-hashed passwords.</span></li>
+  <li><b>Invest</b><span>POST /investments records the amount and recomputes every investor's ownership share for that property.</span></li>
+  <li><b>Distribute</b><span>POST /distributions/&lt;property&gt; pays out rental income proportionally and logs a transaction per shareholder.</span></li>
+  <li><b>Risk score</b><span>A weighted average of five factors, each from 0 to 1: valuation volatility (25%), investor concentration measured with the Herfindahl index (20%), funding level (20%), cap rate (20%) and depreciation (15%). Scaled to 0 to 100: under 30 is Low, 30 to 55 Medium, above 55 High.</span></li>
+  <li class="out"><b>Time-weighted return</b><span>The Modified Dietz method weights each investment by how long it was deployed, so a deposit made yesterday does not distort the return.</span></li>
+</ol>
+
+## Results
+
+A working full-stack app with ten API endpoints and five MongoDB collections (users, properties, investments, transactions and valuation history), deployed to Vercel. Risk scores appear on the property list, the property detail page and the portfolio, and the portfolio summary card shows the time-weighted return.
+
+## Limitations
+
+- **The live demo is down.** The deployed site loads, but its API currently returns a server error, so this story links to the code only. <span class="todo">TODO(shawn): fix the Vercel deployment's database connection, then add the demo link back.</span>
+- **No automated tests.** The repository has none yet, which matters more for code that moves money around, even pretend money.
+- **Pretend money.** There are no real payments, KYC or legal structure behind the investments.
+- **The README trails the code.** The risk score, time-weighted return, valuation endpoint and valuations collection are in the code but not yet in the README, which still lists nine endpoints and four collections.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Bring the demo back up</strong> with seeded sample properties, so anyone can invest fake money in under a minute.</li>
+  <li><strong>Test the money paths first:</strong> share recalculation, payouts and the return calculation, with rounding cases.</li>
+</ol>

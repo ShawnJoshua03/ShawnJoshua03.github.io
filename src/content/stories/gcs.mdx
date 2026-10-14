@@ -1,0 +1,66 @@
+---
+title: 'GCS: Geometric Code Slicer'
+tagline: 'Turns raw 3D-printer G-code back into a 3D model. Best Hardware Hack, MakeUC 2024.'
+areas: [software]
+headline: Reverse Slicer Turns Raw G-Code Back Into a 3D Model, Takes Best Hardware Hack
+deck: Built by a team of four at MakeUC 2024, GCS reads a printer's instructions and works backward to the object, then animates the print layer by layer. The printer was not consulted.
+kicker: Hardware · Hackathon
+date: 2024-11-01
+dateline: Cincinnati
+excerpt: A regex-based parser pulls X, Y, Z movement and extrusion values out of raw G-code, rebuilds the toolpath as an OBJ model, and animates it layer by layer. Best Hardware Hack at MakeUC 2024.
+stack: [Python, Flask, Matplotlib, imageio, HTML, CSS, JavaScript, Tailwind CSS]
+award: Best Hardware Hack, MakeUC 2024
+metrics:
+  - { value: Winner, label: 'Best Hardware Hack, MakeUC 2024', source: Resume }
+  - { value: '2', label: 'Outputs from one upload: an .obj model and a .gif animation', source: README }
+  - { value: 0.2 mm, label: 'Layer height used to group points into faces', source: GSlice.py }
+  - { value: '4', label: 'Teammates', source: README }
+links:
+  code: https://github.com/djcadon/GCS
+rank: { all: 5, eng: 4, ai: 9, product: 10 }
+---
+
+## The Problem
+
+A slicer turns a 3D model into G-code, the line-by-line movement instructions a printer follows. The trip only goes one way. If all you have is the G-code, you no longer have the model, and you cannot see what a file will print without printing it.
+
+## What I Built
+
+GCS, the Geometric Code Slicer, built at MakeUC 2024 with Caden O'Leary, Ibrahim Konare and Yiwei Wang. It is a Flask web app: drag in a G-code file, watch a progress bar, and download two things, an .obj 3D model rebuilt from the toolpath and an animated .gif of the print, layer by layer. It won Best Hardware Hack.
+
+<span class="todo">TODO(shawn): which part was yours. Your one commit on the shared repo is a single 198-line file, so a sentence on what you worked on during the hackathon would help.</span>
+
+<figure class="chart">
+  <figcaption class="title">What GCS sees in a G-code file</figcaption>
+  <img src="/images/gcs-model.webp" width="640" height="480" alt="A 3D plot of a printed ring rebuilt from G-code, colored from purple at the bottom layers to yellow at the top, with a few straight travel lines crossing the build plate." loading="lazy" />
+  <p class="source">Source: final frame of the animation GCS generated for a sample file (processed/model_animation.gif in the project repository).</p>
+</figure>
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Upload</b><span>Drag-and-drop a G-code file into the Flask app.</span></li>
+  <li><b>Parse</b><span>Regular expressions pull X, Y, Z and extrusion (E) values from every G1 move, carrying the last known position forward when an axis is missing.</span></li>
+  <li><b>Build the mesh</b><span>Consecutive positions become edges. Points are grouped into 0.2 mm layers, and neighboring points in a layer form triangular faces. Y and Z are swapped to match the OBJ coordinate convention.</span></li>
+  <li><b>Animate</b><span>Matplotlib draws one frame per layer on a purple-to-yellow gradient, and imageio stitches the frames into a GIF.</span></li>
+  <li class="out"><b>Download</b><span>The .obj model and the .gif come back to the browser.</span></li>
+</ol>
+
+## Results
+
+Best Hardware Hack at MakeUC 2024, the University of Cincinnati's hackathon. The figure above is the tool's own output.
+
+## Limitations
+
+- **Travel moves leak into the model.** A move is kept if it extrudes or changes position, so non-printing G1 travel moves show up as stray lines, visible in the figure above.
+- **G1 only.** Rapid moves (G0) and arcs (G2, G3) are ignored, so curved toolpaths written as arcs come out incomplete.
+- **A wireframe, not a solid.** Faces join neighboring points within a layer. The result is a useful preview, not a watertight mesh you could print again.
+- **Fixed layer height.** Layers are grouped at 0.2 mm regardless of the file's actual layer height.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Separate printing from travel</strong> by tracking whether extrusion actually increases between moves.</li>
+  <li><strong>Read the layer height from the file</strong> and support arc moves.</li>
+  <li><strong>Close each layer into a contour</strong> and loft between layers to produce a solid mesh.</li>
+</ol>

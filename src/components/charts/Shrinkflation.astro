@@ -1,0 +1,60 @@
+---
+import { scaleLinear, scaleTime } from 'd3-scale';
+import { line, curveStepAfter } from 'd3-shape';
+import data from '../../data/shrinkflation-doritos.json';
+import { SIZES } from '../../lib/chart';
+
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+
+const hist = data.history.map((h) => ({ ...h, d: new Date(h.record_date + 'T00:00:00Z'), cents: h.price_per_unit * 100 }));
+const a = data.alert;
+const cut = new Date(a.date_changed + 'T00:00:00Z');
+const after = hist.find((h) => +h.d === +cut)!;
+const year = (d: Date) => String(d.getUTCFullYear());
+
+const charts = SIZES.map((s) => {
+  const m = { l: 8, r: 52 };
+  const x = scaleTime().domain([hist[0].d, hist.at(-1)!.d]).range([m.l + 6, s.w - m.r]);
+  const sizeTop = 34, sizeH = 50;
+  const ppuTop = sizeTop + sizeH + 52, ppuH = s.key === 'sm' ? 92 : 120;
+  const ys = scaleLinear().domain([9.1, 9.9]).range([sizeTop + sizeH, sizeTop]);
+  const yp = scaleLinear().domain([48, 57]).range([ppuTop + ppuH, ppuTop]);
+  const sizePath = line<(typeof hist)[0]>().x((h) => x(h.d)).y((h) => ys(h.size)).curve(curveStepAfter)(hist) ?? '';
+  const ppuPath = line<(typeof hist)[0]>().x((h) => x(h.d)).y((h) => yp(h.cents))(hist) ?? '';
+  const h = ppuTop + ppuH + 52;
+  return { s, m, x, ys, yp, sizeTop, sizeH, ppuTop, ppuH, sizePath, ppuPath, h };
+});
+const label = `${data.product}: bag size fell from ${a.old_size} to ${a.new_size} ${a.size_unit} in ${year(cut)} while the price stayed at $${a.new_price}, so the price per ounce rose ${a.effective_price_increase_pct}%. Price per ounce went from ${hist[0].cents.toFixed(1)} cents in ${year(hist[0].d)} to ${hist.at(-1)!.cents.toFixed(1)} cents in ${year(hist.at(-1)!.d)}.`;
+---
+<figure class="chart">
+  <figcaption class="title">Same price, less bag</figcaption>
+  {!compact && <p class="sub">{data.product}. When the bag shrank in {year(cut)}, the shelf price held at ${a.new_price}. The price per ounce did not.</p>}
+  {charts.map(({ s, m, x, ys, yp, sizeTop, sizeH, ppuTop, ppuH, sizePath, ppuPath, h }) => (
+    <svg class={s.key} viewBox={`0 0 ${s.w} ${h}`} role="img" aria-label={label} font-size={s.font}>
+      <text x="0" y={sizeTop - 16} class="t-strong">Bag size, ounces</text>
+      <line class="baseline" x1={m.l} x2={s.w - m.r} y1={sizeTop + sizeH} y2={sizeTop + sizeH} style="stroke: var(--rule)" />
+      <path class="series" d={sizePath} style="stroke: var(--ink)" />
+      <text x={x(hist.at(-1)!.d) + 6} y={ys(a.new_size) + 4} class="t-strong">{a.new_size}</text>
+      <text x={x(hist[0].d)} y={ys(a.old_size) - 8}>{a.old_size} oz</text>
+      <line class="marker" x1={x(cut)} x2={x(cut)} y1={sizeTop - 6} y2={ppuTop + ppuH} style="stroke-dasharray: 2 3; stroke: var(--ink-3)" />
+
+      <text x="0" y={ppuTop - 16} class="t-strong">Price per ounce, cents</text>
+      <path class="series" d={ppuPath} />
+      {hist.map((p) => <circle class="dot" cx={x(p.d)} cy={yp(p.cents)} r="4.5" />)}
+      <text x={x(hist[0].d)} y={yp(hist[0].cents) + 20}>{hist[0].cents.toFixed(1)}</text>
+      <text x={x(hist.at(-1)!.d) + 8} y={yp(hist.at(-1)!.cents) + 4} class="t-accent">{hist.at(-1)!.cents.toFixed(1)}</text>
+      <text x={x(cut) - 6} y={yp(after.cents) - 12} text-anchor="end" class="t-accent">+{a.effective_price_increase_pct}% at the same ${a.new_price}</text>
+
+      {hist.map((p, i) => (
+        <g>
+          <text x={x(p.d)} y={ppuTop + ppuH + 22} text-anchor={i === 0 ? 'start' : i === hist.length - 1 ? 'end' : 'middle'}>{year(p.d)}</text>
+          {(s.key === 'lg' || i === 0 || i === hist.length - 1 || +p.d === +cut) && (
+            <text x={x(p.d)} y={ppuTop + ppuH + 40} text-anchor={i === 0 ? 'start' : i === hist.length - 1 ? 'end' : 'middle'} class="t-strong">${p.price.toFixed(2)}</text>
+          )}
+        </g>
+      ))}
+    </svg>
+  ))}
+  <p class="source">Source: Shrinkflation Sleuth dataset. Size change per {a.source}. Shelf prices (bottom row) are representative, not live quotes.</p>
+</figure>

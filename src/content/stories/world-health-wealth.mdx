@@ -1,0 +1,67 @@
+---
+title: 'World Health & Wealth'
+tagline: 'Five linked D3 views on how wealth relates to health across 165 countries.'
+areas: [ai]
+headline: Richer Countries Live Longer, and Five Linked Charts Let You Check
+deck: Two histograms, a scatter plot and two maps over Our World in Data's 2022 figures. Brush any one of them and the other four follow.
+kicker: Data Visualization
+date: 2026-02-01
+dateline: Cincinnati
+excerpt: An interactive D3 dashboard on GDP per person, life expectancy and under-five mortality, built around one shared selection state so every view stays in sync.
+lede:
+  - How strongly is wealth connected to health at a global scale? This dashboard lets you check instead of taking a chart's word for it. GDP per person sits against life expectancy and under-five mortality for 2022, across five linked views.
+  - Brush a range on either histogram, drag a box on the scatter plot, or click a country on a map, and the other views update at once. Everything runs on D3 v7 from one shared selection state.
+stack: [D3.js v7, JavaScript, HTML, CSS, Python (preprocessing), GeoJSON, Vercel]
+metrics:
+  - { value: '5', label: 'Linked views: two histograms, a scatter plot, two choropleth maps', source: README }
+  - { value: '3', label: 'Country-level measures: GDP per person, life expectancy, under-five mortality', source: README }
+  - { value: '165', label: 'Countries in the cleaned dataset with GDP and life expectancy', source: world_data.csv }
+  - { value: '2022', label: 'Most recent year common to all three measures', source: README }
+links:
+  demo: https://world-health-wealth-dashboard.vercel.app
+  code: https://github.com/ShawnJoshua03/world-health-wealth-dashboard
+rank: { all: 8, eng: 8, ai: 4, product: 12 }
+chart: world-scatter
+---
+
+## The Problem
+
+How strongly is wealth connected to health across countries? Static charts answer one slice of that at a time. I wanted distributions, correlation and geography visible together, so that selecting a group in one view shows where it sits in all the others.
+
+## What I Built
+
+An interactive dashboard over three Our World in Data measures for 2022: GDP per person, life expectancy at birth, and under-five mortality. Before writing any code I sketched the layout so every related view would be on screen at once, because brushing and linking only feel natural when nothing has to scroll.
+
+The layout: two histograms for distributions, a central scatter plot for correlation, two choropleth maps for geography, dropdowns to switch measures, and an information panel linked to the current selection.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Preprocess in Python</b><span>Filter each CSV to the most recent common year, merge on country code, drop non-country entries, and keep only valid three-letter ISO codes so rows line up with the world GeoJSON.</span></li>
+  <li><b>One selection state</b><span>Every view reads from and writes to a single shared selection. When it changes, all views redraw.</span></li>
+  <li><b>Histograms</b><span>Brush horizontally to select a value range. Hover a bar for its range and country count.</span></li>
+  <li><b>Scatter plot</b><span>Drag a rectangle to select many countries, click to select one, hover for exact values.</span></li>
+  <li class="out"><b>Maps</b><span>Sequential scales with meaning: blue for GDP, green for life expectancy, deeper red for higher child mortality. Click a country to select it everywhere.</span></li>
+</ol>
+
+## Results
+
+Three patterns stand out once you start brushing. GDP per person and life expectancy rise together, with wealthier countries in the upper right of the scatter plot. GDP and under-five mortality move in opposite directions, which is clearest when you brush the low-GDP range and watch the maps. And the clusters are regional: many Sub-Saharan African countries sit in the low-GDP, high-mortality corner, while Western Europe and North America cluster at high income and high life expectancy.
+
+The hardest part was the interaction logic in the scatter plot. The brush overlay kept swallowing clicks, and fixing it meant restructuring the event handling. Aligning country codes between the data and the GeoJSON was the other.
+
+## Limitations
+
+- **One year only.** The data is a 2022 snapshot, so the dashboard shows relationships, not change over time.
+- **Linear GDP scale.** GDP per person spans more than two orders of magnitude; a log scale would separate the low-income countries that bunch together on the left. The chart on this page uses one.
+- **No color legend on the maps**, and the layout is not yet tuned for small screens.
+- **One outlier is real, not a bug.** The Central African Republic sits at a life expectancy of 18.8 years, far below every other country. That is the figure Our World in Data publishes for 2022 (it reports 50.6 for 2020 and 57.4 for 2023), so the dashboard shows the source faithfully. A single-year snapshot cannot show that context.
+- AI tools helped debug D3 interactions and refine the layout. The data processing, design decisions and final integration were mine.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Add time</strong>, so the selection can be replayed across years.</li>
+  <li><strong>Add a log-scale toggle for GDP</strong> and a color legend on each map.</li>
+  <li><strong>Make it work on a phone.</strong></li>
+</ol>

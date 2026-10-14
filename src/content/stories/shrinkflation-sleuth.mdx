@@ -1,0 +1,95 @@
+---
+title: 'Shrinkflation Sleuth'
+tagline: 'An AI agent that turns ''this bag feels lighter'' into the real price-per-ounce increase.'
+areas: [ai, software, product]
+headline: Doritos Bag Shrinks; Price Per Ounce Quietly Climbs 5.4%
+deck: An AI agent built in three days for the Google Cloud Rapid Agent Hackathon answers the one question the shelf tag won't. Across 29 documented size cuts, the average hidden increase was 12.2%.
+kicker: Consumer · AI Agents
+date: 2026-06-01
+dateline: Cincinnati
+excerpt: One Google ADK agent with six playbooks, running on Gemini, reads every fact through five read-only Elastic MCP tools and leads each answer with the effective price increase per unit.
+lede:
+  - When a 9.75-ounce bag of Doritos became a 9.25-ounce bag at the same $4.99, the price per ounce rose 5.4%. The shelf tag said nothing. Shrinkflation Sleuth is an AI agent that turns "this bag feels lighter" into that number, with a source.
+  - It is a single Google ADK agent running on Gemini, with six playbooks in its instructions. Every fact it uses comes through five read-only Elastic MCP tools. I built it in three days for the Google Cloud Rapid Agent Hackathon, Elastic track.
+stack: [Python, Google ADK, Gemini Flash, Elasticsearch, ES|QL, Model Context Protocol, Elastic MCP server, FastMCP, FastAPI, Docker, Cloud Run, Cloud Build, pytest, ruff, GitHub Actions]
+metrics:
+  - { value: '+12.2%', label: 'Average hidden price-per-unit increase across 29 documented size cuts', source: README }
+  - { value: '+25%', label: 'Worst case: Haribo Goldbears, 5 oz to 4 oz at the same $1.99', source: README }
+  - { value: '6', label: 'Playbooks in a single ADK LlmAgent', source: README }
+  - { value: '5', label: "Read-only Elastic MCP tools, the agent's only data access", source: README }
+  - { value: '35', label: 'pytest tests for the math, data, agent wiring and MCP server', source: README }
+  - { value: 3 days, label: 'Hackathon build time', source: README }
+links:
+  demo: https://shawnjoshua03.github.io/shrinkflation-sleuth/
+  code: https://github.com/ShawnJoshua03/shrinkflation-sleuth
+rank: { all: 3, eng: 2, ai: 2, product: 2 }
+chart: shrinkflation
+---
+
+## The Problem
+
+Shrinkflation is when a product gets smaller while the price stays the same. Capital One Shopping research estimates it has touched roughly a third of grocery items. Shoppers notice, but nobody can easily answer the one question that matters: how much more am I paying per ounce?
+
+## What I Built
+
+An AI agent that answers that question with a number and a source. Ask "Has my Doritos bag gotten smaller?" and it finds the product, pulls its size and price history, checks the documented size change and its source, and reports the effective price increase, a severity rating, a consumer tip and one suggested next check.
+
+It is one Google ADK `LlmAgent` on Gemini. Its instructions hold six playbooks: product lookup, brand investigation, category analysis, shopping-list audit, trend dashboard and data discovery. Gemini picks the playbook for each question. All data access goes through five read-only Elastic MCP tools: `search`, `esql`, `list_indices`, `get_mappings` and `get_shards`. It does not browse or scrape; it answers from a curated dataset in Elasticsearch.
+
+The live demo is a Sleuth Explorer. Hosting the full agent publicly would mean exposing an Elasticsearch cluster and a Gemini key, so the explorer runs the same playbooks in the browser, without an LLM, over the exact JSON documents the agent queries. Each panel shows the tool calls the agent would make. It says so on the page.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Find the product</b><span>A fuzzy full-text search over the product catalog in Elasticsearch, through the MCP search tool.</span></li>
+  <li><b>Pull the history</b><span>One ES|QL query returns size and price over time and computes the price per unit at every point.</span></li>
+  <li><b>Cross-check the event</b><span>Look up the documented size change and its source. Reports that exist only on r/shrinkflation are flagged as unverified.</span></li>
+  <li class="out"><b>Report</b><span>Lead with the effective price increase, which is always larger than the shrinkage percentage when the price holds. Then severity, a tip and a next check.</span></li>
+</ol>
+
+In production, two Cloud Run services: the official Elastic MCP server image over HTTP, and this repo's FastAPI app serving the ADK chat UI. Locally, the agent starts a roughly 70-line Python MCP server over stdio that exposes the same five tools. Only the connection parameters change.
+
+## Results
+
+<div class="table-wrap">
+
+| Dataset and outcome | Value |
+|---|---|
+| Products · brands · categories | 34 · 16 · 7 |
+| History records | 170 |
+| Documented size cuts (verified) | 29 (24) |
+| Unchanged control products | 5 |
+| Average hidden increase across the 29 cuts | **+12.2%** |
+| Average shrinkage across the same cuts | 10.2% |
+| Worst case | Haribo Goldbears, **+25%** |
+| Tests | 35 |
+
+</div>
+
+What I learned building it:
+
+- **One agent with playbooks beat a pipeline of agents.** I first sketched a sequential agent (lookup, analyze, report). That forces every question through a product lookup, which is wrong for "which category is worst?" A single agent with explicit playbooks has fewer moving parts and no handoff failures, and the tool sequence still shows in the trace.
+- **Agent quality is mostly instruction quality.** Real multi-step behavior came from playbooks where each step's output feeds the next, plus explicit error paths: zero hits, missing history, and one retry on an ES|QL syntax error.
+- **Report the right metric.** The sticker price hides shrinkflation. The price per unit exposes it.
+
+## Limitations
+
+<div class="corrections">
+<span class="label">Correction</span>
+
+An earlier version of my resume described it as a multi-agent system that scraped retailers and used an Elasticsearch vector store. It is one agent. It does not scrape. It searches a curated dataset with Elasticsearch full-text search and ES|QL, and there is no vector store.
+
+</div>
+
+- **No quantitative evaluation of the agent.** The six query types were spot-checked by hand. Answer quality and tool-call accuracy were never benchmarked.
+- **Demo-scale data.** Sizes, dates and sources follow public reports, but prices are representative, not live quotes, and points between documented events are interpolated.
+- **The original Elastic Cloud cluster has been shut down.** Running the agent means loading the data into your own cluster.
+- **The explorer imitates Elasticsearch.** Its search mimics `multi_match` with fuzziness, so edge cases can rank differently.
+- **A reproducibility bug, now caught.** The pipeline was documented as deterministic but derived product codes from Python's per-process salted `hash()`. A test now regenerates the data and fails if the committed files drift.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Benchmark the agent.</strong> A labelled set of questions with expected tool calls and answers, scored on every change.</li>
+  <li><strong>Replace representative prices with real price captures</strong>, so the hidden-increase numbers come from receipts rather than estimates.</li>
+</ol>

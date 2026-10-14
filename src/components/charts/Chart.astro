@@ -1,0 +1,18 @@
+---
+// Maps a story's `chart` frontmatter key to its chart component.
+import SepsisRisk from './SepsisRisk.astro';
+import Affinity from './Affinity.astro';
+import Shrinkflation from './Shrinkflation.astro';
+import WorldScatter from './WorldScatter.astro';
+
+interface Props { name: string; compact?: boolean }
+const { name, compact = false } = Astro.props;
+const CHARTS: Record<string, any> = {
+  'sepsis-risk': SepsisRisk,
+  affinity: Affinity,
+  shrinkflation: Shrinkflation,
+  'world-scatter': WorldScatter,
+};
+const Component = CHARTS[name];
+---
+{Component && <Component compact={compact} />}

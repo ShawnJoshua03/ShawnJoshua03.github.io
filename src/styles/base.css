@@ -1,0 +1,110 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.55;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+img, svg { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 1px; }
+p { margin: 0 0 1em; }
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.012em;
+  margin: 0;
+  text-wrap: balance;
+}
+h2 a, h3 a { text-decoration: none; }
+h2 a:hover, h3 a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+ul, ol { padding-left: 1.2em; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
+abbr { text-decoration: none; }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--paper-2); padding: 0.05em 0.3em; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+
+.wrap { max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip {
+  position: absolute; left: var(--gutter); top: -40px; z-index: 10;
+  background: var(--ink); color: var(--paper); padding: 0.4rem 0.8rem;
+  font-family: var(--font-mono); font-size: 0.85rem;
+}
+.skip:focus { top: 8px; }
+
+/* Small labels: kickers, datelines, chart text, buttons. */
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kicker, .dateline, .byline {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kicker { color: var(--accent); font-weight: 500; margin: 0 0 0.5rem; }
+.byline { color: var(--ink-2); margin: 0.75rem 0 0; }
+.dateline { font-weight: 600; color: var(--ink); }
+/* Separator after the dateline city. */
+.dateline::after { content: '\00B7'; margin: 0 0.5em; font-weight: 400; }
+.dateline.bare::after { display: none; }
+.deck {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+  margin: 0.6rem 0 0;
+  text-wrap: pretty;
+}
+.smallcaps { font-variant-caps: all-small-caps; letter-spacing: 0.04em; }
+.todo {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: #fff3b0;
+  color: #3a3000;
+  padding: 0.05em 0.35em;
+  border: 1px dashed #8a7400;
+}
+
+/* Buttons: rectangular, inked, no gradients. */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4em;
+  min-height: 44px; padding: 0.55rem 1rem;
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none;
+  border: 1px solid var(--ink); color: var(--ink); background: transparent;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.rule-double { border: 0; border-top: 3px double var(--rule-strong); margin: 0; }
+.rule-thick { border: 0; border-top: 2px solid var(--rule-strong); margin: 0; }
+.rule-thin { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+.tags { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-2); line-height: 1.6; }
+.tags span + span::before { content: ' · '; color: var(--ink-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

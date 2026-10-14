@@ -1,0 +1,70 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Chart from '../../components/charts/Chart.astro';
+import { SITE } from '../../config';
+import { monthYear } from '../../lib/projects';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('stories', (s) => !s.data.draft);
+  return stories.map((story) => ({ params: { slug: story.id }, props: { story } }));
+}
+
+const { story } = Astro.props;
+const d = story.data;
+const { Content } = await render(story);
+---
+<Base title={`${d.title} · ${SITE.name}`} description={d.tagline} ogImage={`/og/${story.id}.png`}>
+  <article>
+    <header class="story-head wrap">
+      <p class="eyebrow"><a href="/#projects" style="text-decoration:none">Projects</a> · {d.kicker} · {monthYear(d.date)}</p>
+      <h1>{d.title}</h1>
+      <p class="deck">{d.tagline}</p>
+      {d.award && <p class="award-line">{d.award}</p>}
+      <div class="btn-row">
+        {d.links.demo && <a class="btn primary" href={d.links.demo}>Live demo</a>}
+        {d.links.code && <a class="btn" href={d.links.code}>Code</a>}
+        {d.links.devpost && <a class="btn" href={d.links.devpost}>Devpost</a>}
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="story-grid">
+        <aside class="story-side" aria-label="Project facts">
+          <div class="sticky">
+            {d.metrics.length > 0 && (
+              <section class="by-numbers">
+                <h2>By the numbers</h2>
+                <dl>
+                  {d.metrics.map((m) => (
+                    <div class="row">
+                      <dt>{m.value}</dt>
+                      <dd>{m.label}{m.source && <span class="src">Source: {m.source}</span>}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+            <section class="side-block">
+              <h2>Built with</h2>
+              <p class="tags">{d.stack.map((t) => <span>{t}</span>)}</p>
+            </section>
+          </div>
+        </aside>
+
+        <div class="story-body">
+          {d.chart && <div class="story-hero"><Chart name={d.chart} /></div>}
+          <p class="lead-in">{d.deck}</p>
+          <Content />
+          <footer class="story-foot">
+            <div class="btn-row">
+              {d.links.demo && <a class="btn primary" href={d.links.demo}>Live demo</a>}
+              {d.links.code && <a class="btn" href={d.links.code}>Code</a>}
+              <a class="btn" href="/#projects">All projects</a>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>

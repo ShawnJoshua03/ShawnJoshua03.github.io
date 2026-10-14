@@ -1,0 +1,40 @@
+---
+import { scaleLinear } from 'd3-scale';
+import results from '../../data/sepsis-results.json';
+import { SIZES, pct, thousands } from '../../lib/chart';
+
+const c = results.clinical;
+const rows = [
+  { label: 'Septic patients flagged in the useful window', n: c.septic_detected_in_window, of: c.septic_patients, cls: 'bar' },
+  { label: 'Septic patients who also alarmed earlier', n: c.septic_with_alarm_before_window, of: c.septic_patients, cls: 'bar-muted' },
+  { label: 'Patients without sepsis who got an alarm', n: c.nonseptic_patients_alarmed, of: c.nonseptic_patients, cls: 'bar-muted' },
+];
+const rowH = 58;
+const charts = SIZES.map((s) => {
+  const h = rows.length * rowH + 8;
+  const x = scaleLinear().domain([0, 1]).range([0, s.w - 52]);
+  return { s, h, x };
+});
+const label = rows.map((r) => `${r.label}: ${pct(r.n / r.of)} (${thousands(r.n)} of ${thousands(r.of)})`).join('. ');
+---
+<figure class="chart">
+  <figcaption class="title">What 93% detection costs</figcaption>
+  <p class="sub">Share of held-out patients, at the threshold chosen by cross-validation (0.32).</p>
+  {charts.map(({ s, h, x }) => (
+    <svg class={s.key} viewBox={`0 0 ${s.w} ${h}`} role="img" aria-label={label} font-size={s.font}>
+      {rows.map((r, i) => {
+        const y0 = i * rowH;
+        return (
+          <g>
+            <text x="0" y={y0 + 14} class="t-strong">{r.label}</text>
+            <rect class="track" x="0" y={y0 + 22} width={x(1)} height="16" />
+            <rect class={r.cls} x="0" y={y0 + 22} width={x(r.n / r.of)} height="16" />
+            <text x={x(1) + 8} y={y0 + 35} class={i === 0 ? 't-accent' : 't-strong'}>{pct(r.n / r.of)}</text>
+            <text x="0" y={y0 + 52}>{thousands(r.n)} of {thousands(r.of)}</text>
+          </g>
+        );
+      })}
+    </svg>
+  ))}
+  <p class="source">Source: PhysioNet 2019 Challenge, 4,441 held-out patients. sepsis-early-warning/artifacts/clinical_report.json</p>
+</figure>

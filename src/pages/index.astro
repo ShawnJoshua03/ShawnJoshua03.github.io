@@ -1,0 +1,259 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ProjectTile from '../components/ProjectTile.astro';
+import { SITE, FOCUSES, SKILLS } from '../config';
+import { projects } from '../lib/projects';
+import { SASE, ITEMS, CERTIFICATIONS } from '../data/community';
+import { INTERESTS } from '../data/leisure';
+
+const all = await projects();
+const jobs = (await getCollection('business')).sort((a, b) => b.data.sort.localeCompare(a.data.sort));
+const jobBodies = await Promise.all(jobs.map(async (j) => (await render(j)).Content));
+const community = [...ITEMS].sort((a, b) => b.sort.localeCompare(a.sort));
+const description = `${SITE.name}: software, AI/ML, data and product work. ${SITE.degree}, ${SITE.school}, graduating ${SITE.grad}. Projects with real numbers, live demos and their limitations.`;
+
+// Headline numbers. Every figure is sourced on its project or job below.
+const tiles = [
+  { num: '93%', what: 'of septic ICU patients flagged in time, a median 12 hours before onset', src: 'Sepsis Early Warning', href: '#sepsis-early-warning', cls: 'wide ink' },
+  { num: '$48M+', what: 'AI sourcing RFP I led at Kroger Finance', src: 'Kroger, 2026', href: '#kroger-finance', cls: 'accent' },
+  { num: 'Best Hardware Hack', what: 'MakeUC 2024, with GCS, a reverse slicer for 3D printers', src: 'GCS', href: '#gcs', cls: 'word' },
+  { num: '50+', what: 'active users on RentRadar, the rent platform I founded', src: 'RentRadar', href: '#rentradar', cls: '' },
+  { num: '25+', what: 'SASE chapters I work with as South Central Regional Coordinator', src: 'SASE, 2026', href: '#leadership', cls: '' },
+  { num: '+5.4%', what: 'hidden price-per-ounce rise my AI agent reports on a bag of Doritos', src: 'Shrinkflation Sleuth', href: '#shrinkflation-sleuth', cls: 'wide accent' },
+  { num: '99.3%', what: 'success rate for automated anomaly detection at Owens Corning', src: 'Owens Corning, 2024', href: '#owens-corning', cls: 'wide' },
+  { num: '200+', what: 'people at my TEDxGnms talk on perseverance', src: 'Dubai, 2020', href: '#tedx', cls: 'wide ink' },
+];
+
+const timeline = [
+  { y: '2017', c: 'Dubai', t: 'High school at GEMS Education' },
+  { y: '2019', c: 'Dubai', t: 'First data role: research analyst at Brighter Prep' },
+  { y: '2020', c: 'Dubai', t: 'TEDxGnms talk; Knowledge Hour president' },
+  { y: '2022', c: 'Cincinnati', t: 'Moved to study computer science at the University of Cincinnati' },
+  { y: '2024', c: 'Cincinnati', t: 'Owens Corning data internship; Best Hardware Hack at MakeUC' },
+  { y: '2025', c: 'Cincinnati', t: 'Kroger Technology & Digital; founded RentRadar; SASE co-president' },
+  { y: '2026', c: 'Cincinnati', t: 'Kroger Finance; SASE South Central Regional Coordinator; graduating in December' },
+];
+---
+<Base title={SITE.title} description={description}>
+  <section class="hero" aria-labelledby="name">
+    <div class="wrap">
+      <p class="eyebrow">Software · AI & Data · Product</p>
+      <div class="hero-grid">
+        <div>
+          <h1 id="name">{SITE.name}</h1>
+          {FOCUSES.map((f) => <p class={`pitch pitch-v p-${f.id}`}>{f.pitch}</p>)}
+          <p class="facts">
+            <span>B.S. Computer Science @ {SITE.school}</span>
+            <span>Graduating Dec 2026</span>
+            <span>{SITE.location}</span>
+            {SITE.showWorkAuth && SITE.workAuthNote && <span>{SITE.workAuthNote}</span>}
+          </p>
+          <div class="btn-row">
+            <a class="btn primary" href={SITE.resumePdf} download>Resume PDF</a>
+            <a class="btn" href={SITE.github} rel="me">GitHub</a>
+            <a class="btn" href={SITE.linkedin} rel="me">LinkedIn</a>
+            <a class="btn" href={`mailto:${SITE.email}`}>Email</a>
+          </div>
+        </div>
+        <aside class="forecast" aria-label="Availability">
+          <b>Forecast</b>
+          Graduating December 2026.<br />100% chance of availability.
+        </aside>
+      </div>
+      <hr class="rule-double" />
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="numbers-h" style="padding-top:0">
+    <div class="wrap">
+      <h2 class="sr-only" id="numbers-h">By the numbers</h2>
+      <p class="eyebrow">By the numbers</p>
+      <div class="bento reveal">
+        {tiles.map((t) => (
+          <a class:list={['tile', ...t.cls.split(' ').filter((c) => c && c !== 'word')]} href={t.href}>
+            <span class:list={['num', { word: t.cls.includes('word') }]}>{t.num}</span>
+            <span>
+              <span class="what" style="display:block">{t.what}</span>
+              <span class="src" style="display:block">{t.src}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="projects" aria-labelledby="projects-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Selected work</p>
+          <h2 id="projects-h">Projects</h2>
+          <p>Each one has its numbers, how it works, and what it still gets wrong. Open any card for the full write-up.</p>
+        </div>
+        <div class="chips" role="group" aria-label="Filter projects">
+          {FOCUSES.map((f) => <button class="chip" type="button" data-focus={f.id} aria-pressed={f.id === 'all' ? 'true' : 'false'}>{f.label}</button>)}
+        </div>
+      </div>
+      <p class="sr-only" aria-live="polite" id="focus-status"></p>
+      <div class="projects">
+        {all.map((p) => <ProjectTile project={p} all={all} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="experience" aria-labelledby="experience-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Work</p>
+          <h2 id="experience-h">Experience</h2>
+        </div>
+      </div>
+      <div class="jobs">
+        {jobs.map((j, i) => {
+          const d = j.data;
+          const Body = jobBodies[i];
+          return (
+            <article class:list={['job', 'reveal', { small: d.metrics.length === 0 }]} id={j.id} aria-labelledby={`${j.id}-h`}>
+              <div class="when">{d.start === d.end ? d.start : `${d.start} to ${d.end}`}<span class="where">{d.dateline}</span></div>
+              <div>
+                <h3 id={`${j.id}-h`}>{d.org}<span>{d.role}</span></h3>
+                <p class="summary">{d.excerpt}</p>
+              </div>
+              {d.metrics.length > 0 && (
+                <dl class="figs">
+                  {d.metrics.slice(0, 4).map((m) => <div><dt>{m.value}</dt><dd>{m.label}</dd></div>)}
+                </dl>
+              )}
+              <details class="more">
+                <summary>Details</summary>
+                <div class="beat-body"><Body /></div>
+              </details>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="leadership" aria-labelledby="leadership-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Community</p>
+          <h2 id="leadership-h">Leadership</h2>
+          <p>SASE, from intern to regional coordinator in under three years.</p>
+        </div>
+      </div>
+      <ol class="ladder reveal" aria-label="SASE roles, earliest first">
+        {SASE.map((s) => (
+          <li>
+            <span class="step"></span>
+            <b>{s.title}</b>
+            <span class="dates">{s.start} to {s.end}</span>
+            {s.note && <p>{s.note}</p>}
+          </li>
+        ))}
+      </ol>
+      <div class="ladder-base"></div>
+      <div class="cards">
+        {community.map((c) => (
+          <article id={c.id} class="reveal">
+            <p class="meta">{c.org} · {c.when}</p>
+            <h3>{c.role}</h3>
+            <p>{c.body}</p>
+            {c.todo && <p><span class="todo">TODO(shawn): {c.todo}</span></p>}
+          </article>
+        ))}
+      </div>
+      <ul class="certs" aria-label="Certifications and awards">
+        {CERTIFICATIONS.map((c) => <li>{c.name}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="about" aria-labelledby="about-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">About</p>
+          <h2 id="about-h">Dubai to Cincinnati</h2>
+        </div>
+      </div>
+      <div class="about-grid">
+        <div class="about-bio reveal">
+          <p>I grew up in Dubai. I finished high school at GEMS Education in 2021, gave a TEDxGnms talk on perseverance along the way, and spent my last summer there as a student teacher. In January 2022 I moved to Cincinnati to study computer science at the University of Cincinnati, where I graduate in December 2026 with a minor in information technology.</p>
+          <p>Since then I have done analytics at Owens Corning, portfolio and finance work at Kroger, founded a rental platform, and built machine learning and full-stack projects. I write each one up the same way: what I built, what the numbers are, and where they stop holding up.</p>
+          <p>Coursework: AI, Machine Learning, Algorithms, Database Design, Data Visualization, Operating Systems, Networking.</p>
+        </div>
+        <ol class="timeline reveal" aria-label="Timeline">
+          {timeline.map((j) => (
+            <li class:list={{ cin: j.c === 'Cincinnati' }}>
+              <span class="y">{j.y}</span><span class:list={['c', j.c === 'Dubai' ? 'dxb' : 'cvg']}>{j.c}</span>
+              <p>{j.t}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="skills">
+        {SKILLS.map((g) => (
+          <div class="reveal">
+            <h3>{g.group}</h3>
+            <ul>{g.items.map((i) => <li>{i}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="interests" aria-labelledby="interests-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Off the clock</p>
+          <h2 id="interests-h">Interests</h2>
+        </div>
+      </div>
+      <div class="interests">
+        {INTERESTS.map((i) => (
+          <article id={i.id} class="reveal">
+            <h3>{i.title}</h3>
+            <p>{i.line}</p>
+            <p><span class="todo">TODO(shawn): {i.todo}</span></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { FOCUSES } from '../config';
+  const root = document.documentElement;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip')];
+  const status = document.getElementById('focus-status');
+  const ids = FOCUSES.map((f) => f.id);
+  const current = () => root.dataset.focus || 'all';
+  const mark = () => chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.focus === current())));
+  mark();
+
+  function show(id: string, push: boolean) {
+    if (id === 'all') delete root.dataset.focus;
+    else root.dataset.focus = id;
+    mark();
+    if (push) {
+      const url = new URL(location.href);
+      if (id === 'all') url.searchParams.delete('focus');
+      else url.searchParams.set('focus', id);
+      history.pushState({ focus: id }, '', url);
+    }
+    const label = FOCUSES.find((f) => f.id === id)?.label ?? 'All';
+    if (status) status.textContent = `Showing ${label} projects.`;
+  }
+  chips.forEach((c) => c.addEventListener('click', () => show(c.dataset.focus ?? 'all', true)));
+  addEventListener('popstate', () => {
+    const f = new URLSearchParams(location.search).get('focus');
+    show(f && ids.includes(f as never) ? f : 'all', false);
+  });
+</script>

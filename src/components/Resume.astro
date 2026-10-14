@@ -1,0 +1,111 @@
+---
+// The resume as HTML. Same structure as the PDF, but project numbers follow the
+// current READMEs (see the Corrections boxes on the Sepsis and Shrinkflation stories).
+import { SITE } from '../config';
+import { CERTIFICATIONS } from '../data/community';
+
+const skills = [
+  { group: 'Languages & Frameworks', items: 'Python, TypeScript, JavaScript, SQL, C++, Java, HTML/CSS, React, FastAPI, Flask, Next.js, Node.js, D3.js' },
+  { group: 'AI / ML', items: 'Google Cloud ADK, Gemini, Elasticsearch, Neo4j, LangChain, vector embeddings, scikit-learn, pandas, NumPy' },
+  { group: 'Cloud & Tools', items: 'GCP, Firebase, Supabase, AWS, Git, Docker, Power BI, Azure ML, Power Automate, Oracle, Coupa, ServiceNow, Excel, VS Code' },
+];
+
+const experience = [
+  {
+    org: 'Kroger Finance', role: 'Contracting Efficiencies & Enablement Intern', when: 'May 2026 to Aug 2026',
+    bullets: [
+      'Led two technology RFPs, including a $48M+ AI sourcing initiative for ML-based produce-freshness solutions, driving technical evaluation of competing ML offerings, sourcing, and cross-functional communication end to end.',
+      "Built a data pipeline to categorize and align ~20% of the team's technology spend, surfacing vendor consolidation opportunities and informing sourcing decisions.",
+    ],
+  },
+  {
+    org: 'Kroger Technology & Digital', role: 'Portfolio Analyst Intern', when: 'Jan 2025 to Aug 2025',
+    bullets: [
+      'Built Power BI dashboards adopted by 50+ IT staff, improving outage detection analysis by 25% and giving visibility into Time to Detect, Time to Resolve and root-cause trends.',
+      'Designed and optimized Coupa and Oracle reporting spaces overseeing $80M+ in vendor spend, increasing reporting efficiency for 30+ finance managers.',
+      'Evaluated Power Automate to streamline the Coupa to Power BI data flow, and built documentation frameworks for multi-year SOW cost tracking.',
+      'Managed offshore desktop inventory reporting with 10 global vendors, consolidating 150+ line items per month into pivot-based summaries for leadership.',
+    ],
+  },
+  {
+    org: 'Owens Corning', role: 'Data Analyst Intern', when: 'May 2024 to Aug 2024',
+    bullets: [
+      'Built 98%-accurate anomaly detection thresholds from 6 months of plant history for the Toronto and Waxahachie plants; detected a 15% glass-heat anomaly that triggered a multi-system reorganization.',
+      'Helped automate real-time anomaly detection graphs (Power BI, Seeq, TwinThread, Python, Excel) at a 99.3% success rate; cloud analysis for the Memphis and Medina plants improved operational efficiency by 10%.',
+    ],
+  },
+  {
+    org: 'RentRadar', role: 'Founder', when: 'May 2025 to present',
+    bullets: [
+      'Founded and shipped rentradar.org (React, Flask, LangChain, PostgreSQL) to crowdsource rent fairness and landlord data, leading product, growth and monetization to 60 active users and 30 reviews in the first cycle; live with 50+ active users. 2nd place overall, CEAS Summer Innovation Challenge; $5K in funding.',
+    ],
+  },
+];
+
+const projects = [
+  {
+    name: 'Sepsis Early-Warning System', stack: 'Python, scikit-learn, FastAPI, Docker', when: 'Jul 2026',
+    text: 'Hourly ICU sepsis early-warning model on PhysioNet 2019 Challenge data with causal, leakage-tested features and patient-level splits. On 4,441 held-out patients: 0.424 on the official utility metric, AUROC 0.817, and 93% of septic patients flagged a median 12 hours before onset, with the 59% false-alarm rate reported alongside.',
+  },
+  {
+    name: 'Shrinkflation Sleuth', stack: 'Python, Google ADK, Gemini, Elasticsearch, MCP', when: 'Jun 2026',
+    text: 'Single Google ADK agent with six playbooks that answers shrinkflation questions through five read-only Elastic MCP tools and ES|QL, leading every answer with the effective price-per-unit increase. Built in three days for the Google Cloud Rapid Agent Hackathon (Elastic track).',
+  },
+  {
+    name: 'Concert Radar', stack: 'FastAPI, Supabase, Spotify API, Ticketmaster API, D3.js', when: 'May 2026',
+    text: 'Full-stack recommendation app that scores artist affinity from Spotify listening history and ranks nearby Ticketmaster concerts; FastAPI and PostgreSQL backend with Spotify OAuth, a D3 frontend, and 39 tests in CI.',
+  },
+  {
+    name: 'GCS (Geometric Code Slicer)', stack: 'Python, Flask, Matplotlib', when: 'Nov 2024',
+    text: 'Team of four. G-code reverse slicer that rebuilds 3D models (OBJ) and layer-by-layer GIF animations from raw G-code, using a regex parser for X/Y/Z movement and extrusion values. Best Hardware Hack, MakeUC 2024.',
+  },
+  {
+    name: 'Hi-Five', stack: 'Python, Flask, Next.js, TypeScript, Neo4j', when: 'Oct 2024',
+    text: 'SASEHack team of three. Matching app that embeds five OCEAN personality answers with bge-en-icl and ranks candidates in Neo4j by personality similarity (60%) and shared interest tags (40%); built the frontend, login, API endpoints and chat.',
+  },
+];
+---
+<div class="resume-doc">
+  <div class="print-only">
+    <p class="resume-print-name">{SITE.name}</p>
+    <p class="contact">Cincinnati, OH (open to relocation) · {SITE.email} · linkedin.com/in/shawn-lasrado · github.com/ShawnJoshua03 · shawnjoshua03.github.io</p>
+  </div>
+
+  <h3 id="education">Education</h3>
+  <div class="entry">
+    <div class="entry-head"><b>{SITE.school}</b><span>{SITE.grad}</span></div>
+    <div>B.S. Computer Science, Information Technology minor</div>
+    <div>Coursework: AI, Machine Learning, Algorithms, Database Design, Data Visualization, Operating Systems, Networking</div>
+  </div>
+
+  <h3>Skills & Certifications</h3>
+  {skills.map((s) => <div class="entry" style="margin-bottom:0.3rem"><b>{s.group}:</b> {s.items}</div>)}
+  <div class="entry" style="margin-bottom:0.3rem"><b>Certifications:</b> {CERTIFICATIONS.map((c) => c.name).join(', ')}</div>
+
+  <h3>Experience</h3>
+  {experience.map((e) => (
+    <div class="entry">
+      <div class="entry-head"><b>{e.org} · {e.role}</b><span>{e.when}</span></div>
+      <ul>{e.bullets.map((b) => <li>{b}</li>)}</ul>
+    </div>
+  ))}
+
+  <h3>Projects</h3>
+  {projects.map((p) => (
+    <div class="entry">
+      <div class="entry-head"><b>{p.name} · <span style="font-family:var(--font-mono);font-size:0.78rem;font-weight:400">{p.stack}</span></b><span>{p.when}</span></div>
+      <div>{p.text}</div>
+    </div>
+  ))}
+
+  <h3>Activities</h3>
+  <div class="entry">
+    <div class="entry-head"><b>SASE · South Central Regional Coordinator (prev. Co-President)</b><span>Jun 2026 to present</span></div>
+    <ul><li>Work with representatives from 25+ SASE chapters to organize national and regional conferences that promote networking between students and company representatives.</li></ul>
+  </div>
+  <div class="entry">
+    <div class="entry-head"><b>TEDxGnms · Speaker</b><span>Oct 2020</span></div>
+    <ul><li>Delivered an 8-minute talk on perseverance to 200+ people.</li></ul>
+  </div>
+
+</div>

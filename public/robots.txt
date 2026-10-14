@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://shawnjoshua03.github.io/sitemap-index.xml

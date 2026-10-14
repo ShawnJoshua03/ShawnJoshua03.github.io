@@ -1,0 +1,291 @@
+{
+ "source": "Sepsis Early Warning live demo, precomputed scores from the committed model (static/demo_patients.json)",
+ "sourceUrl": "https://shawnjoshua03.github.io/sepsis-early-warning/",
+ "patient": "p010983",
+ "kind": "Septic, caught in time",
+ "threshold": 0.32,
+ "onsetHour": 69,
+ "firstAlertHour": 60,
+ "points": [
+  {
+   "hour": 2,
+   "risk": 0.1581
+  },
+  {
+   "hour": 3,
+   "risk": 0.1179
+  },
+  {
+   "hour": 4,
+   "risk": 0.1201
+  },
+  {
+   "hour": 5,
+   "risk": 0.0981
+  },
+  {
+   "hour": 6,
+   "risk": 0.2065
+  },
+  {
+   "hour": 7,
+   "risk": 0.1883
+  },
+  {
+   "hour": 8,
+   "risk": 0.2142
+  },
+  {
+   "hour": 9,
+   "risk": 0.1016
+  },
+  {
+   "hour": 10,
+   "risk": 0.0697
+  },
+  {
+   "hour": 11,
+   "risk": 0.1159
+  },
+  {
+   "hour": 12,
+   "risk": 0.1697
+  },
+  {
+   "hour": 13,
+   "risk": 0.1669
+  },
+  {
+   "hour": 14,
+   "risk": 0.0914
+  },
+  {
+   "hour": 15,
+   "risk": 0.1176
+  },
+  {
+   "hour": 16,
+   "risk": 0.104
+  },
+  {
+   "hour": 17,
+   "risk": 0.1026
+  },
+  {
+   "hour": 18,
+   "risk": 0.0763
+  },
+  {
+   "hour": 19,
+   "risk": 0.0906
+  },
+  {
+   "hour": 20,
+   "risk": 0.0959
+  },
+  {
+   "hour": 21,
+   "risk": 0.1022
+  },
+  {
+   "hour": 22,
+   "risk": 0.1052
+  },
+  {
+   "hour": 23,
+   "risk": 0.0752
+  },
+  {
+   "hour": 24,
+   "risk": 0.0444
+  },
+  {
+   "hour": 25,
+   "risk": 0.0402
+  },
+  {
+   "hour": 26,
+   "risk": 0.0376
+  },
+  {
+   "hour": 27,
+   "risk": 0.0326
+  },
+  {
+   "hour": 28,
+   "risk": 0.0378
+  },
+  {
+   "hour": 29,
+   "risk": 0.0378
+  },
+  {
+   "hour": 30,
+   "risk": 0.0387
+  },
+  {
+   "hour": 31,
+   "risk": 0.0369
+  },
+  {
+   "hour": 32,
+   "risk": 0.0369
+  },
+  {
+   "hour": 33,
+   "risk": 0.021
+  },
+  {
+   "hour": 34,
+   "risk": 0.0123
+  },
+  {
+   "hour": 35,
+   "risk": 0.0117
+  },
+  {
+   "hour": 36,
+   "risk": 0.0103
+  },
+  {
+   "hour": 37,
+   "risk": 0.011
+  },
+  {
+   "hour": 38,
+   "risk": 0.011
+  },
+  {
+   "hour": 39,
+   "risk": 0.0107
+  },
+  {
+   "hour": 40,
+   "risk": 0.0162
+  },
+  {
+   "hour": 41,
+   "risk": 0.0168
+  },
+  {
+   "hour": 42,
+   "risk": 0.0168
+  },
+  {
+   "hour": 43,
+   "risk": 0.0193
+  },
+  {
+   "hour": 44,
+   "risk": 0.0261
+  },
+  {
+   "hour": 45,
+   "risk": 0.0384
+  },
+  {
+   "hour": 46,
+   "risk": 0.0566
+  },
+  {
+   "hour": 47,
+   "risk": 0.0758
+  },
+  {
+   "hour": 48,
+   "risk": 0.1014
+  },
+  {
+   "hour": 49,
+   "risk": 0.0909
+  },
+  {
+   "hour": 50,
+   "risk": 0.1027
+  },
+  {
+   "hour": 51,
+   "risk": 0.0804
+  },
+  {
+   "hour": 52,
+   "risk": 0.1006
+  },
+  {
+   "hour": 53,
+   "risk": 0.1187
+  },
+  {
+   "hour": 54,
+   "risk": 0.0965
+  },
+  {
+   "hour": 55,
+   "risk": 0.2383
+  },
+  {
+   "hour": 56,
+   "risk": 0.2319
+  },
+  {
+   "hour": 57,
+   "risk": 0.2123
+  },
+  {
+   "hour": 58,
+   "risk": 0.2485
+  },
+  {
+   "hour": 59,
+   "risk": 0.2229
+  },
+  {
+   "hour": 60,
+   "risk": 0.4905
+  },
+  {
+   "hour": 61,
+   "risk": 0.505
+  },
+  {
+   "hour": 62,
+   "risk": 0.5174
+  },
+  {
+   "hour": 63,
+   "risk": 0.5179
+  },
+  {
+   "hour": 64,
+   "risk": 0.5272
+  },
+  {
+   "hour": 65,
+   "risk": 0.6662
+  },
+  {
+   "hour": 66,
+   "risk": 0.6192
+  },
+  {
+   "hour": 67,
+   "risk": 0.5863
+  },
+  {
+   "hour": 68,
+   "risk": 0.6609
+  },
+  {
+   "hour": 69,
+   "risk": 0.7136
+  },
+  {
+   "hour": 70,
+   "risk": 0.7085
+  },
+  {
+   "hour": 71,
+   "risk": 0.7217
+  }
+ ]
+}

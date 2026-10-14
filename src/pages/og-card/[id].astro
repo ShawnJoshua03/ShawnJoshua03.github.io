@@ -1,0 +1,55 @@
+---
+// 1200x630 social preview cards. scripts/og-images.mjs screenshots each one
+// into public/og/<id>.png. Not linked anywhere and not indexed.
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/newsreader/wght-italic.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import { SITE, FOCUSES } from '../../config';
+import { projects } from '../../lib/projects';
+
+export async function getStaticPaths() {
+  const all = await projects();
+  const top = all.slice(0, 3).map((p) => ({ kicker: p.data.kicker, title: p.data.title, line: p.data.metrics[0] ? `${p.data.metrics[0].value} ${p.data.metrics[0].label.toLowerCase()}` : p.data.tagline }));
+  const cards = [
+    { id: 'front', kicker: `${SITE.degree} · ${SITE.school} · ${SITE.grad}`, title: SITE.name, line: FOCUSES[0].pitch, top },
+    ...all.map((p) => ({ id: p.id, kicker: p.data.kicker, title: p.data.title, line: p.data.tagline, top: undefined })),
+  ];
+  return cards.map((c) => ({ params: { id: c.id }, props: c }));
+}
+const { kicker, title, line, top } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+    <style>
+      html, body { margin: 0; }
+      body { width: 1200px; height: 630px; background: #f6f1e7; color: #1a1813; font-family: 'Newsreader Variable', Georgia, serif; overflow: hidden; }
+      .card { box-sizing: border-box; height: 630px; padding: 56px 72px 44px; display: flex; flex-direction: column; }
+      .mono { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 18px; letter-spacing: 0.12em; text-transform: uppercase; }
+      .kicker { color: #1d3a6e; }
+      h1 { font-family: 'Fraunces Variable', serif; font-weight: 800; font-variation-settings: 'opsz' 144; font-size: 120px; line-height: 0.92; letter-spacing: -0.045em; margin: 22px 0 0; }
+      h1.long { font-size: 92px; }
+      .line { font-style: italic; font-size: 34px; line-height: 1.28; color: #4b463c; margin: 26px 0 0; max-width: 1000px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+      .top { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: auto; border-top: 3px double #1a1813; padding-top: 16px; }
+      .top div { padding: 0 22px; border-left: 1px solid #cdc3af; }
+      .top div:first-child { padding-left: 0; border-left: 0; }
+      .top .mono { font-size: 13px; color: #1d3a6e; }
+      .top b { display: block; font-family: 'Fraunces Variable', serif; font-size: 30px; line-height: 1.1; margin-top: 6px; }
+      .top span.l { display: block; font-size: 19px; color: #4b463c; margin-top: 4px; }
+      .foot { margin-top: auto; display: flex; justify-content: space-between; border-top: 3px double #1a1813; padding-top: 14px; color: #4b463c; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="mono kicker">{kicker}</div>
+      <h1 class:list={{ long: title.length > 16 }}>{title}</h1>
+      <p class="line">{line}</p>
+      {top
+        ? <div class="top">{top.map((t) => <div><span class="mono">{t.kicker}</span><b>{t.title}</b><span class="l">{t.line}</span></div>)}</div>
+        : <div class="foot mono"><span>{SITE.name}</span><span>shawnjoshua03.github.io</span></div>}
+    </div>
+  </body>
+</html>
