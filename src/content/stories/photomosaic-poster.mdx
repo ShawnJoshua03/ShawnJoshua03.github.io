@@ -1,0 +1,54 @@
+---
+title: 'Photomosaic Poster'
+tagline: 'Turn a target photo and a folder of pictures into a print-ready mosaic poster.'
+areas: [software]
+headline: Make a Photo Mosaic That Is Ready for a Printer
+deck: Photomosaic Poster takes a target image and a collection of photos through selection, matching, printer checks and paper previews, then exports files for different print workflows.
+kicker: Imaging · Python
+date: 2026-10-17
+dateline: October 17, 2026
+excerpt: Photomosaic Poster handles the full path from collecting photos to preparing a poster for print. It checks printer requirements, previews the result on the chosen paper and can create alternate files when a printer rejects an export.
+lede:
+  - 'A mosaic has to work at two scales: the tile photos should be visible up close, while their arrangement reads as a larger picture from a distance. For a printed poster, that visual balance is only part of the job: the input photos, paper and printer also affect the final file.'
+  - 'Photomosaic Poster combines photo collection, target comparison, tile matching, printer presets and print previews. Its Python command-line tool makes print-oriented files; the browser version runs on the user''s device and produces RGB output.'
+stack: ['Python 3.9+', rawpy, av]
+metrics:
+  - { value: '600', label: 'Photos in the generated example mosaic', source: README }
+  - { value: '175 megapixels', label: 'Print size the strip-based renderer can fit in memory', source: README }
+  - { value: '75 MB', label: 'Maximum file size for the plotter-bond preset', source: README }
+  - { value: '300 DPI', label: 'Resolution sent by the plotter-bond preset', source: README }
+  - { value: '4 to 5', label: 'Uses per photo above which repeats become noticeable', source: README }
+links:
+  demo: https://shawnjoshua03.github.io/photomosaic-poster/
+  code: https://github.com/ShawnJoshua03/photomosaic-poster
+rank: {}
+---
+
+## The Problem
+
+A photo mosaic has to preserve two views at once: individual photos should be recognizable up close, while their colors and placement form the target image from across the room. Preparing a poster adds practical constraints. Photos arrive in different formats, the image has to fit a paper size, and each printer may require a particular color mode, resolution or file-size limit.
+
+## What I Built
+
+Photomosaic Poster is a Python command-line tool for making photo mosaic posters, with a browser version of the same engine. Its workflow starts before rendering: friends can upload photos to the user's computer, and `compare` scores target candidates and shows mosaic previews. The `check` command tests a proposed job against a printer preset before a full render.
+
+The renderer writes a report alongside each poster. The HTML report includes views at different scales and a paper preview, printer-rule checks with recommendations, and a checklist for taking the file to the printer. When a printer rejects a file, `--fallbacks` can produce PDF, JPEG, RGB and CMYK alternatives; `--test-strip` can create a small test print.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Collect and choose</b><span>Friends can upload photos from their phones to the computer running the collection command. The compare command scores target candidates and shows side-by-side mosaic previews.</span></li>
+  <li><b>Check the printer</b><span>Select a preset such as plotter-bond, photo-lab or canvas. The preset supplies requirements such as resolution, color mode, file type and size limit; command-line options can override them.</span></li>
+  <li><b>Prepare the photos</b><span>Images are decoded upright, cropped square and cached. Exact duplicates and Mac zip junk are dropped, while similar photos are grouped using a perceptual hash. Zip archives can be read directly, and video frames are opt-in.</span></li>
+  <li><b>Match tiles</b><span>The target is cropped to the poster shape and averaged into a grid. Each tile is matched to a photo by color in CIE Lab; the matcher limits repeats, separates look-alikes and gives every distinct photo a spot.</span></li>
+  <li><b>Render for print</b><span>Tint and an optional faint, sharpened target overlay adjust the image. The poster is drawn in strips to limit memory use, then converted to the requested color mode and saved at the best quality that fits the size limit.</span></li>
+  <li class="out"><b>Review and recover</b><span>The HTML report previews the poster on the selected paper and lists printer checks and recommendations. Test strips, panels and alternate output formats provide options for print jobs that need adjustment.</span></li>
+</ol>
+
+## Limits
+
+- The browser version runs on the user's device and creates RGB files only. Use the Python command-line tool for CMYK output, camera RAW decoding and batch work.
+- Camera RAW decoding requires the optional `rawpy` dependency. Video-frame support requires optional `av` and must be enabled with `--include-videos`.
+- Paper simulation is an approximation. When the print shop provides an ICC profile for the printer and paper, the tool can use it for a soft proof.
+- Repeats become noticeable above about four to five uses per photo. The README's default grid aims for tiles about half an inch across, and suggests collecting more photos or reducing the number of columns when repeats are too frequent.
+- The documented demo images are generated, rather than photos from a real event.
