@@ -1,0 +1,59 @@
+---
+title: 'AFib ECG Classifier'
+tagline: 'Classifying single-lead ECG recordings, with a demo that includes model mistakes.'
+areas: [software, ai]
+headline: ECG Rhythm Classification with Visible Mistakes and Evaluation Limits
+deck: A classical machine learning pipeline classifies ECG recordings as Normal, AFib, Other rhythm or Noisy. The demo shows held-out examples, detected beats and predictions. There is no clinical validation.
+kicker: Health · Machine Learning
+date: 2026-10-19
+dateline: PhysioNet/CinC Challenge 2017
+excerpt: A gradient boosting model uses beat intervals, signal quality and waveform summaries to classify single-lead ECG recordings. The browser demo includes errors and uncalibrated probabilities, while the evaluation documents the limits of splitting by recording.
+stack: [Python 3.13, SciPy, scikit-learn, React, Bklit UI, pytest]
+metrics:
+  - { value: '0.780', label: 'Held-out mean F1 across Normal, AFib and Other, using the challenge metric; not a leaderboard result', source: README }
+  - { value: '0.667', label: 'Logistic regression baseline held-out mean F1 using the same metric', source: README }
+  - { value: '1,705', label: 'Held-out test recordings after excluding the duplicate test signal', source: README }
+  - { value: '34', label: 'Features used by the gradient boosting model', source: README }
+  - { value: '28', label: 'Curated held-out recordings in the demo, including mistakes', source: README }
+links:
+  code: https://github.com/ShawnJoshua03/afib-ecg-classifier
+  demo: https://shawnjoshua03.github.io/afib-ecg-classifier/
+rank: {}
+---
+
+## The Problem
+
+This project asks whether classical machine learning can classify single-lead ECG recordings from the PhysioNet/CinC Challenge 2017 dataset as Normal, AFib, Other rhythm or Noisy. Beat timing is part of the signal: AFib often appears as irregularly spaced heartbeats.
+
+## What I Built
+
+A Python pipeline that reads ECG recordings, detects candidate beats, extracts features and trains a gradient boosting classifier. It compares the model with a majority-class baseline and logistic regression based on beat intervals.
+
+A React demo shows curated held-out recordings with detected peaks, the true label, the model prediction and probabilities. It includes mistakes. The selection is for inspection and is not an evaluation set.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Read the signal</b><span>Convert each recording to millivolts using its WFDB header. Read the sampling rate from the header instead of assuming it.</span></li>
+  <li><b>Detect candidate beats</b><span>Apply a band-pass filter, an energy envelope and SciPy peak detection. Markers follow absolute filtered extrema, so they can land on an S wave.</span></li>
+  <li><b>Extract features</b><span>Summarize the intervals between beats, signal quality, waveform shape and recording duration.</span></li>
+  <li><b>Select the model</b><span>Train a class-balanced scikit-learn HistGradientBoostingClassifier. Choose settings through cross-validation on the training split only. There is no deep learning.</span></li>
+  <li class="out"><b>Evaluate and inspect</b><span>Evaluate on held-out recordings, then show selected examples and errors in the demo.</span></li>
+</ol>
+
+The design and evaluation rules were frozen before fitting. The test set was never used for tuning. Training writes the results to `artifacts/results.json`, which the README identifies as the source of its reported numbers.
+
+## Results
+
+The gradient boosting model scored above the logistic regression and majority-class baselines on the held-out test set. The reported challenge metric averages F1 for Normal, AFib and Other rhythm; Noisy predictions still count in errors. These are local held-out results, not official leaderboard results, because the challenge's private test set was not used.
+
+Other rhythm and Noisy are the weakest classes. The README publishes per-class precision, recall and F1 alongside a confusion matrix, so the overall score can be read with the errors behind it.
+
+## Limitations
+
+- **The split is by recording, not patient.** The inspected headers and labels have no documented patient IDs. Recordings from the same patient may appear in both splits, which can inflate scores. An exact duplicate crossed the split; its test copy was excluded before fitting any model.
+- **The data covers a limited setting.** The dataset is small, with short recordings from a single lead and device. Labels are noisy, Other combines different rhythms, and Noisy has few test examples.
+- **Beat detection has limited validation.** It was checked on synthetic signals only. The README claims no accuracy against expert beat annotations.
+- **Probabilities are uncalibrated.** The curated demo includes errors and cannot establish model performance.
+- **Saved artifacts have caveats.** The README points to a release review covering stale final-split count metadata and limits of the saved model hashes.
+- **No clinical validation.** This is not a medical device and is not for diagnosis.

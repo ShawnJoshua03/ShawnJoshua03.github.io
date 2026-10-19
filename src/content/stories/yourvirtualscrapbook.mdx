@@ -1,0 +1,73 @@
+---
+title: 'Your Virtual Scrapbook'
+tagline: 'A flip-through birthday book where each friend''s note and photos become their own designed page.'
+areas: [software, product]
+headline: Each Friend's Note Becomes Its Own Page in a Book You Flip Through
+deck: Next.js, GSAP and canvas-confetti turn a data object into a book with 3D page turns and a page style per friend. The repo is the engine pulled out of one real gift book, with multi-user sharing and AI page picking still on the roadmap.
+kicker: Birthdays · Front End
+date: 2026-10-17
+dateline: Cincinnati
+excerpt: Every friend sends a note and a few photos, and each one becomes its own page, designed around what they wrote, in a book you flip through. This repo holds the engine from one real scrapbook, with every personal detail moved into data.
+lede:
+  - 'This started as a one-off scrapbook for a friend''s 22nd birthday: 15 friends, about 100 photos and videos, used almost entirely on iPhones and iPads. That book stays private, so this repo is the engine pulled out of it, with the personal details moved into data.'
+  - 'Each friend''s page uses one design chosen to fit what they sent: a postcard, a camcorder frame, a photo-booth strip, a jigsaw, and more. The demo runs locally as a fictional book for Alex from fourteen fictional friends, one for each page style, using generated illustrations instead of real photos.'
+stack: [Next.js, GSAP, canvas-confetti]
+metrics:
+  - { value: '15', label: 'Friends in the original birthday book', source: README }
+  - { value: '~100', label: 'Photos and videos in that book', source: README }
+  - { value: '14', label: 'Fictional friends in the local demo, one per page style', source: README }
+  - { value: '4', label: 'Phone rendering fixes learned on real devices and now built in', source: README }
+links:
+  demo: https://yourvirtualscrapbook.vercel.app
+  code: https://github.com/ShawnJoshua03/yourvirtualscrapbook
+rank: {}
+---
+
+## The Problem
+
+The first book was a one-off build for a friend's 22nd birthday: 15 friends, about 100 photos and videos, opened almost entirely on iPhones and iPads. It works, but it stays private and it is tied to that one person. The repo takes the reusable part, the engine, and moves every personal detail into data, on its way to becoming something anyone can make.
+
+## What I Built
+
+A book engine plus a demo book. Each friend's contribution becomes one page, and every page uses a design chosen to fit what they sent: a postcard from where they are, polaroids and a friendship receipt, photos pegged to fairy lights you drag sideways, a home-video frame with a timecode, a photo-booth strip, instant photos that develop when tapped, toy blocks with real physics, tap-through stories, a slider through the years, a 3x3 jigsaw, airplane window shades, plates ordered at a little restaurant, two neon lines that merge, a route with checkpoints, and simpler photo piles.
+
+The README's demo is local: run it and open `/demo` for a fictional book for Alex from fourteen fictional friends, one for each page style. The images in it are generated illustrations, not real photos.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Book data</b><span><code>src/engine/types.ts</code> defines a Book: the recipient, the page setup for each friend, and their contributions. Every style reads its text, titles, stamps and checkpoints, from that data, with neutral defaults.</span></li>
+  <li><b>A page style per friend</b><span>The README's table lists the styles, from <code>postcard</code> and <code>years</code> to <code>birthdays</code>, <code>dump</code> and <code>auto</code>. <code>src/demo/book.ts</code> shows an example of each.</span></li>
+  <li><b>The engine</b><span><code>src/engine/</code> holds the 3D page turns, the photo viewer, stickers, sound and the styles. It began as plain browser scripts in <code>legacy/</code>; <code>mount.ts</code> supplies the globals they expect and loads them in order inside the <code>&lt;Scrapbook&gt;</code> client component.</span></li>
+  <li><b>Demo media</b><span><code>scripts/make-demo-media.mjs</code> generates the demo's illustrated placeholder photos and videos.</span></li>
+  <li class="out"><b>A book you flip through</b><span>Pages turn in 3D, jumps from the contents page play a single turn, and the whole thing runs in the browser.</span></li>
+</ol>
+
+Four things learned the hard way on real phones, now built in:
+
+- **Long jumps skip ahead.** Jumping from the contents page moves silently to the page before the target and plays one turn, instead of drawing every page in between, which crashed iPhones.
+- **Pages sit a fraction of a pixel apart in 3D**, because Safari sorts 3D layers by depth and ignores z-index.
+- **The turning page's shadow is its own layer**, faded by opacity, so iOS doesn't repaint the whole page each frame.
+- **No SVG `filter` effects**, because they are redrawn in software every frame of a 3D page turn.
+
+## Where It Stands
+
+Roadmap step 1 is done: the engine is extracted, the personal details live in data, and there is a demo book. `npm run dev` serves it at `localhost:3000/demo`, `npm run build` makes a production build, and `node scripts/make-demo-media.mjs` regenerates the demo media. The README lists the stack as Next.js, GSAP and canvas-confetti.
+
+## Limitations
+
+- **The demo images are generated illustrations, not real photos.**
+- **The original book stays private.** This repo is only the engine, so nothing here contains the real 15-friend book.
+- **No shared books yet.** Roadmap step 2, an organizer creating a book and sharing one invite link so friends add notes and media from their phone with no account, is not built. Supabase for accounts, database and storage is planned.
+- **No AI yet.** Reading each note to pick a style and its details for the organizer to review is roadmap step 3, and the Claude API is listed as planned rather than in use.
+- **The engine is still legacy scripts.** The README says they will be ported to typed modules over time, so the page styles run through the globals that `mount.ts` supplies.
+- **The README's demo route is local**, at `localhost:3000/demo` after `npm run dev`.
+- **Roadmap step 4**, a live photo wall for the day itself, video support and polish, is still ahead.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Ship the invite link</strong> so an organizer can create a book and friends can add their note and media from their phone, with no account.</li>
+  <li><strong>Add the AI page suggestions</strong> that read each note and propose a style, for the organizer to review.</li>
+  <li><strong>Build the live photo wall for the day itself</strong>, with video support and polish.</li>
+</ol>
