@@ -1,0 +1,62 @@
+---
+import { scaleLinear } from 'd3-scale';
+import { SIZES } from '../../lib/chart';
+
+// Hi-Five match score from the project code: the cosine similarity of each OCEAN
+// trait embedding, averaged and weighted 0.6, plus tag Jaccard weighted 0.4.
+// The similarities below are an illustrative pair, not real users.
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+const traits = [
+  { trait: 'Openness', v: 0.82 },
+  { trait: 'Conscientiousness', v: 0.64 },
+  { trait: 'Extraversion', v: 0.71 },
+  { trait: 'Agreeableness', v: 0.88 },
+  { trait: 'Neuroticism', v: 0.55 },
+];
+const personality = traits.reduce((s, t) => s + t.v, 0) / traits.length;
+const tags = 2 / 6;
+const score = 0.6 * personality + 0.4 * tags;
+const parts = [
+  { label: 'Personality', v: 0.6 * personality, cls: 'bar' },
+  { label: 'Shared tags', v: 0.4 * tags, cls: 'bar-muted' },
+];
+const charts = SIZES.map((s) => {
+  const labelW = s.key === 'sm' ? 128 : 150;
+  const tx = scaleLinear().domain([0, 1]).range([0, s.w - labelW - 44]);
+  const sx = scaleLinear().domain([0, 1]).range([0, s.w - 44]);
+  const top = 30 + traits.length * 24 + 34;
+  return { s, labelW, tx, sx, top, h: top + 52 };
+});
+const label = `Hi-Five match score for an example pair: trait similarities of ${traits.map((t) => `${t.trait} ${t.v}`).join(', ')} average ${personality.toFixed(2)}. Two of six interest tags are shared, a Jaccard similarity of ${tags.toFixed(2)}. Score: 0.6 times ${personality.toFixed(2)} plus 0.4 times ${tags.toFixed(2)} equals ${score.toFixed(2)}.`;
+---
+<figure class="chart">
+  <figcaption class="title">How two people get a match score</figcaption>
+  {!compact && <p class="sub">An example pair. Each OCEAN answer is embedded, and the two people are compared trait by trait.</p>}
+  {charts.map(({ s, labelW, tx, sx, top, h }) => (
+    <svg class={s.key} viewBox={`0 0 ${s.w} ${h}`} role="img" aria-label={label} font-size={s.font}>
+      <text x="0" y="12" class="t-strong">Cosine similarity per trait</text>
+      {traits.map((t, i) => (
+        <g>
+          <text x="0" y={40 + i * 24}>{t.trait}</text>
+          <rect class="track" x={labelW} y={30 + i * 24} width={tx(1)} height="12" />
+          <rect class="bar" x={labelW} y={30 + i * 24} width={tx(t.v)} height="12" />
+          <text x={labelW + tx(1) + 8} y={40 + i * 24} class="t-accent">{t.v.toFixed(2)}</text>
+        </g>
+      ))}
+      <text x="0" y={top - 12} class="t-strong">0.6 × personality {personality.toFixed(2)} + 0.4 × tags {tags.toFixed(2)}</text>
+      {parts.map((p, i) => {
+        const x = parts.slice(0, i).reduce((a, q) => a + sx(q.v), 0);
+        return (
+          <g>
+            <rect class={p.cls} x={x} y={top} width={sx(p.v)} height="14" />
+            <text x={x + 4} y={top + 30}>{p.label}</text>
+          </g>
+        );
+      })}
+      <rect class="track" x={sx(score)} y={top} width={sx(1) - sx(score)} height="14" />
+      <text x={sx(1) + 8} y={top + 12} class="t-accent">{score.toFixed(2)}</text>
+    </svg>
+  ))}
+  <p class="source">Illustrative values. Weights and formula from the Hi-Five matching code.</p>
+</figure>

@@ -4,6 +4,7 @@ import SepsisRisk from './SepsisRisk.astro';
 import Affinity from './Affinity.astro';
 import Shrinkflation from './Shrinkflation.astro';
 import WorldScatter from './WorldScatter.astro';
+import Ocean from './Ocean.astro';
 
 interface Props { name: string; compact?: boolean }
 const { name, compact = false } = Astro.props;
@@ -12,6 +13,7 @@ const CHARTS: Record<string, any> = {
   affinity: Affinity,
   shrinkflation: Shrinkflation,
   'world-scatter': WorldScatter,
+  ocean: Ocean,
 };
 const Component = CHARTS[name];
 ---
