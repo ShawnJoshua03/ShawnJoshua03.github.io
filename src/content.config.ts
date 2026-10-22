@@ -49,6 +49,8 @@ const stories = defineCollection({
     rank,
     /** Key of a chart component in src/components/charts (see Chart.astro). */
     chart: z.string().optional(),
+    /** Screenshot or figure under public/images. Shown on showcase tiles without a chart, and as the thumbnail on regular tiles. */
+    image: z.object({ src: z.string(), alt: z.string(), w: z.number().int(), h: z.number().int() }).optional(),
     /** Drafts appear on the front page but get no story page yet. */
     draft: z.boolean().default(false),
   }),

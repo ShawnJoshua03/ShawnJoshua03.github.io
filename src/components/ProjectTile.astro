@@ -8,15 +8,16 @@ const { project, all } = Astro.props;
 const d = project.data;
 const { Content } = await render(project);
 const hooks = focusHooks(project, all);
-const IMAGES: Record<string, { src: string; alt: string; w: number; h: number }> = {
-  gcs: {
-    src: '/images/gcs-model.webp', w: 640, h: 480,
-    alt: 'A 3D plot of a printed ring rebuilt from G-code, colored from purple at the bottom layers to yellow at the top.',
-  },
-};
-const image = IMAGES[project.id];
+const image = d.image;
 ---
 <article class:list={['project', 'reveal', ...hooks.classes]} style={hooks.style} id={project.id} aria-labelledby={`${project.id}-t`}>
+  {(image || d.chart) && (
+    <div class="thumb">
+      {image
+        ? <img src={image.src} width={image.w} height={image.h} alt={image.alt} loading="lazy" decoding="async" />
+        : <Chart name={d.chart!} compact />}
+    </div>
+  )}
   <div class="main">
     <p class="cat">{d.kicker} · {monthYear(d.date)}</p>
     <h3 id={`${project.id}-t`}>{d.title}</h3>

@@ -116,6 +116,13 @@ a.tile.ink:hover { background: var(--ink); color: var(--paper); opacity: 0.92; }
 .project .links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto; padding-top: 1.2rem; }
 .project .links .btn { min-height: 40px; padding: 0.4rem 0.85rem; font-size: 0.72rem; }
 .project .viz { display: none; }
+/* Regular tiles: a screenshot (or compact chart) above the text. */
+.project .thumb { margin: calc(-1 * clamp(1.25rem, 2.2vw, 1.75rem)) calc(-1 * clamp(1.25rem, 2.2vw, 1.75rem)) 1.25rem; border-bottom: 1px solid var(--rule-strong); overflow: hidden; }
+.project .thumb img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; background: #fff; }
+.project .thumb .chart { margin: 0; padding: 1rem clamp(1.25rem, 2.2vw, 1.75rem) 0.75rem; }
+.project .thumb .chart .sm { display: block; }
+.project .thumb .chart .lg { display: none; }
+.project .thumb .chart .source { display: none; }
 
 /* Showcase tiles: the first three projects of the current focus. */
 :root:not([data-focus]) .project.f-all, :root[data-focus='all'] .project.f-all,
@@ -132,6 +139,7 @@ a.tile.ink:hover { background: var(--ink); color: var(--paper); opacity: 0.92; }
 :is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) h3 { font-size: clamp(2.2rem, 5vw, 3.8rem); letter-spacing: -0.035em; font-variation-settings: 'opsz' 144; }
 :is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) .tagline { font-size: clamp(1.15rem, 1.8vw, 1.4rem); }
 :is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) .viz { display: block; }
+:is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) .thumb { display: none; }
 :is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) .stats dt { font-size: clamp(2rem, 3.4vw, 2.8rem); }
 :is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) .stats .extra { display: block; }
 :is(:root:not([data-focus]) .f-all, :root[data-focus='all'] .f-all, :root[data-focus='software'] .f-software, :root[data-focus='ai'] .f-ai, :root[data-focus='product'] .f-product) .details-row { grid-column: 1 / -1; }
