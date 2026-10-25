@@ -1,0 +1,80 @@
+---
+title: 'Jeremy.ai'
+tagline: 'An AR surgical-training simulator for Meta Quest 3, with a voice coach, a score you can audit and a live instructor window.'
+areas: [software, ai, product]
+headline: Headset Turns a Desk Into a Gallbladder Surgery Lab; Nine of Nine Surveyed Trainees Say They Would Use It
+deck: Built at CalHacks 13 by a team of four. You operate with bare hands in passthrough, deterministic code scores the attempt, Claude explains it and Cartesia says it out loud.
+kicker: Healthcare · AR · AI Tutor
+date: 2026-10-25
+dateline: Berkeley
+excerpt: Surgeons learn on someone else's body because practice reps are scarce and feedback is subjective. Jeremy.ai puts the operating room on a $500 headset, scores every attempt with plain Python, and lets an instructor watch live from any browser.
+lede:
+  - "Every surgeon was once a trainee who had to learn on someone else's body. Jeremy.ai is our attempt to give those reps back. You put on a Meta Quest 3, pick up virtual instruments with your bare hands, and practice a laparoscopic gallbladder removal as many times as you want."
+  - "The design rule that shaped everything: the score is deterministic Python, and Claude only explains it. We surveyed nine medical and bio people before building, and all nine said they would use it. Their top asks were feedback they can trust and a coach they can question."
+stack: [Unity 6, OpenXR, Meta Quest 3, C#, Python, FastAPI, Pydantic, SQLAlchemy, Claude, Cartesia, Convex, Apify, React 19, TypeScript, Vite, Render, pytest]
+metrics:
+  - { value: '9 of 9', label: 'Surveyed medical and bio respondents who said they would use it', source: README }
+  - { value: '523', label: 'Backend tests passing on the day of submission', source: README }
+  - { value: '15', label: 'Steps in the featured laparoscopic cholecystectomy, from Veress needle to cystic artery', source: README }
+  - { value: '5', label: 'Technologies integrated: Quest 3, Claude, Cartesia, Convex and Apify', source: README }
+links:
+  demo: https://jeremywantstobeasurgeon.us/
+  code: https://github.com/ShawnJoshua03/Jeremy.ai
+rank: { all: 1, eng: 1, ai: 2, product: 2 }
+image: { src: /images/jeremy-ai.jpg, w: 1280, h: 800, alt: "The Jeremy.ai instructor console in sample mode: a Live coaching dashboard listing four preview sessions with practice scores, a mean score of 81.5 out of 100, and a laparoscopic cholecystectomy session selected. The page labels all data as synthetic." }
+chart: surgeon-survey
+---
+
+## The Problem
+
+Reps are scarce. A trainee gets only as many supervised cases as the schedule allows, and the simulators that give unlimited reps are expensive and live in a lab down the hall. Feedback is rare and subjective: an attending is busy, the OR is loud, and "that was fine" is not a measurement. Mistakes are the costly part, since operating-room time is billed by the minute and one intraoperative adverse event can add five figures to a hospital bill.
+
+## What I Built
+
+Jeremy.ai, an AR trainer where the operating room fits on your desk. On a Quest 3 you see your real room through passthrough, with a virtual practice field in front of you, and you grab instruments with a pinch. When you finish, you get a scorecard, a replay of your hand paths with errors marked, and a coach you can ask "why did I lose points?" out loud. An instructor anywhere can watch the attempt in a browser and send notes, highlights, pauses and retries straight into your view.
+
+<figure>
+  <img src="/images/jeremy-ai-site.jpg" width="1280" height="800" alt="The Jeremy.ai home page: Practice the gallbladder operation until it's yours, with a 9 of 9 survey result and a four-step session walkthrough." loading="lazy" style="width:100%;height:auto;border:1px solid var(--rule)" />
+  <figcaption>The Jeremy.ai site and instructor console, which anyone can try with synthetic sample sessions.</figcaption>
+</figure>
+
+There are four exercises: peg transfer, wound closure, port placement and the featured one, a 15-step laparoscopic cholecystectomy scored on safe clipping and the critical view of safety. The team was four people, and I owned the coaching and reporting layer: the talking guide, the end-of-session report and replay, the mistake-cost model, the Apify price Actor and the instructor dashboard.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Measure</b><span>The headset records hand and head positions at 20 Hz plus structured events. It never records video. All grabs, collisions and step detection run locally, so practice has no network latency.</span></li>
+  <li><b>Decide</b><span>A FastAPI backend scores the attempt with deterministic Python. Same attempt in, same score out, and every point is traceable to a rule with a citation.</span></li>
+  <li><b>Explain</b><span>Claude gets the measured results as structured evidence and writes the debrief. Its output is schema-checked, every event it cites is verified against the real attempt, and any number it writes that the backend did not supply is rejected.</span></li>
+  <li class="out"><b>Speak and show</b><span>Cartesia reads the coaching aloud in the headset. The backend mirrors events to Convex so the React instructor dashboard updates live without polling.</span></li>
+</ol>
+
+Every dependency has a fallback. If Claude is down, a rule-based coach answers. If Cartesia fails, the line stays as text. If Convex is down, the headset session is unaffected.
+
+The cost model prices each attempt as if it had happened in a real OR: OR minutes at $37.45 per minute from a published figure, instrument costs, and the expected cost of errors. A custom Apify Actor, which checks each site's `robots.txt` and never fills in a missing price, refreshes the supply prices. Every dollar figure is labelled illustrative.
+
+## What Trainees Told Us
+
+Before writing the voice and coaching features we surveyed nine people through a Google Form: six medical students, two pre-med or biology undergraduates and one full-time professional. All nine said they would use it. The top need was unlimited safe repetitions, then trustworthy feedback and low cost, then accuracy. That is why scoring is rule-based and cited, and why Claude is not allowed to score.
+
+## Results
+
+A working backend with 523 passing tests, a deployed instructor dashboard and API on Render, and live Cartesia speech verified from a PC. In a CalHacks weekend, four people built the headset app, the scoring API, the voice coach and the live instructor dashboard.
+
+## Limitations
+
+- **No full headset run yet.** The README lists a complete session on a physical Quest 3 as not verified, along with audio playback inside the headset and the headset-to-API round trip.
+- **Live Claude coaching is unverified in the current build.** Tests mock the Claude call, so the rule-based fallback is what is proven.
+- **The Apify Actor is built and deployed, but a recorded live run feeding the cost model has not happened.**
+- **The score is a prototype rubric.** It is not clinically validated and not a certification, and the thresholds are placeholder values.
+- **Nine respondents is a small, self-selected sample.** It shaped our priorities. It is not a market study.
+- **Demo-grade hosting.** Render's free tier sleeps after 15 minutes idle, so the first request can take around 50 seconds, and the SQLite file resets on restart.
+- **No haptics, and the anatomy is stylized.** It trains sequence, safe placement and economy of motion, not the feel of tissue. A surgeon review of the anatomy is the next step.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Run one full session on a headset</strong> end to end and record it, which turns most of the "not verified" rows into evidence.</li>
+  <li><strong>Add side-by-side technique video and virtual patients</strong>, the two features the survey asked for that we did not build.</li>
+  <li><strong>Get a surgeon to review the anatomy and thresholds</strong>, then plan a validation study with a training program.</li>
+</ol>

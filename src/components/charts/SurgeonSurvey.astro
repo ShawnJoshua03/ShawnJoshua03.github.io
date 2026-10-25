@@ -1,0 +1,48 @@
+---
+import { scaleLinear } from 'd3-scale';
+import { SIZES } from '../../lib/chart';
+
+// From the Jeremy.ai README: 9 respondents (6 medical students, 2 pre-med or bio
+// undergraduates, 1 full-time professional), who could name more than one need.
+const N = 9;
+const rows = [
+  { label: 'Unlimited safe repetitions', n: 5, built: true },
+  { label: 'Feedback on what I did', n: 3, built: true },
+  { label: 'Low cost, easy access', n: 3, built: true },
+  { label: 'Scientific accuracy', n: 2, built: true },
+  { label: 'Visual guides, side-by-side video', n: 2, built: false },
+  { label: 'A way to ask questions', n: 1, built: true },
+  { label: 'Guided and unguided modes', n: 1, built: false },
+  { label: 'Instructor feedback', n: 1, built: true },
+  { label: 'Different patients and pathologies', n: 1, built: false },
+];
+const rowH = 44;
+const charts = SIZES.map((s) => {
+  const x = scaleLinear().domain([0, N]).range([0, s.w - 70]);
+  return { s, x, h: rows.length * rowH + 30 };
+});
+const label =
+  'What 9 of 9 surveyed medical and bio respondents asked for, by number of respondents, who could name more than one: ' +
+  rows.map((r) => `${r.label}, ${r.n} (${r.built ? 'built' : 'partly built or on the roadmap'})`).join('; ') + '.';
+---
+<figure class="chart">
+  <figcaption class="title">What nine trainees asked for</figcaption>
+  <p class="sub">All nine said they would use Jeremy.ai. Dark bars shipped in the prototype; gray bars are partial or still on the roadmap.</p>
+  {charts.map(({ s, x, h }) => (
+    <svg class={s.key} viewBox={`0 0 ${s.w} ${h}`} role="img" aria-label={label} font-size={s.font}>
+      {rows.map((r, i) => {
+        const y0 = i * rowH;
+        return (
+          <g>
+            <text x="0" y={y0 + 13} class="t-strong">{r.label}</text>
+            <rect class="track" x="0" y={y0 + 20} width={x(N)} height="14" />
+            <rect class={r.built ? 'bar' : 'bar-muted'} x="0" y={y0 + 20} width={x(r.n)} height="14" />
+            <text x={x(N) + 8} y={y0 + 32} class={r.built ? 't-accent' : 't-strong'}>{r.n} of {N}</text>
+          </g>
+        );
+      })}
+      <text x="0" y={rows.length * rowH + 14}>Respondents could name more than one need. Counts are by theme.</text>
+    </svg>
+  ))}
+  <p class="source">Source: Jeremy.ai README. Self-selected sample collected by the team, not a market study.</p>
+</figure>
