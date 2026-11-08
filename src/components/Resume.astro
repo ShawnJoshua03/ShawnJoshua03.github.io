@@ -4,9 +4,9 @@
 import { SITE } from '../config';
 
 const skills = [
-  { group: 'Languages & Frameworks', items: 'Python, TypeScript, JavaScript, SQL, C++, Java, HTML/CSS, React, FastAPI, Flask, Next.js, Node.js, D3.js' },
+  { group: 'Languages & Frameworks', items: 'Python, TypeScript, JavaScript, SQL, C++, Java, C#, HTML/CSS, React, Next.js, Svelte, Astro, Node.js, FastAPI, Flask, D3.js' },
   { group: 'AI / ML', items: 'Google Cloud ADK, Gemini, Claude API, Elasticsearch, Neo4j, LangChain, vector embeddings, scikit-learn, pandas, NumPy' },
-  { group: 'Cloud & Tools', items: 'GCP, Firebase, Supabase, AWS, Git, Docker, Power BI, Azure ML, Power Automate, Oracle, Coupa, ServiceNow, Excel, VS Code' },
+  { group: 'Cloud & Tools', items: 'GCP, Firebase, Supabase, AWS, PostgreSQL, MongoDB, Git, GitHub Actions, Docker, Vercel, Power BI, Azure ML, Power Automate, Oracle, Coupa, ServiceNow, Excel' },
 ];
 
 const experience = [
@@ -56,15 +56,15 @@ const projects = [
   },
   {
     name: 'Floodplain Creep', stack: 'Python, FastAPI, PostgreSQL, React, MapLibre, Gemini', when: 'Nov 2026',
-    text: 'Solo hackathon build. Maps new buildings in modeled flood zones in Dhaka by neighborhood. Hides counts under 20, checks every number in Gemini-written briefs against computed data, and reports its own accuracy: 55% on 56 held-out cells, with AI-reviewed labels.',
+    text: 'Solo hackathon build. Maps new buildings in modeled flood zones in Dhaka by neighborhood. Hides counts under 20, checks every number in Gemini-written briefs against computed data, and reports its own measured accuracy.',
   },
   {
     name: 'claude-coding-hub', stack: 'TypeScript, MCP, SQLite', when: 'Oct 2026',
-    text: 'MCP server that lets Claude Code delegate to Codex, Gemini CLI, Grok and OpenCode in isolated git worktrees. Each risky action needs a human decision on the exact request, and the lead model has no approve tool. 65 tests; two of five workers verified against real CLIs, three labeled experimental.',
+    text: 'MCP server that lets Claude Code delegate to Codex, Gemini CLI, Grok and OpenCode in isolated git worktrees. Each risky action needs a human decision on the exact request, and the lead model has no approve tool. 65 tests; Codex and OpenCode workers verified against the real CLIs.',
   },
   {
     name: 'AFib ECG Classifier', stack: 'Python, SciPy, scikit-learn, React', when: 'Oct 2026',
-    text: 'Classifies single-lead ECGs as Normal, AFib, Other or Noisy from beat detection and 34 features with gradient boosting. Held-out mean F1 of 0.780 against 0.667 for a logistic regression baseline; test set never used for tuning. Local results, not leaderboard.',
+    text: 'Classifies single-lead ECGs as Normal, AFib, Other or Noisy from beat detection and 34 features with gradient boosting. Held-out mean F1 of 0.780 against 0.667 for a logistic regression baseline; test set never used for tuning.',
   },
   {
     name: 'Shrinkflation Sleuth', stack: 'Python, Google ADK, Gemini, Elasticsearch, MCP', when: 'Jun 2026',
