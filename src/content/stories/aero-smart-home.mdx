@@ -1,0 +1,92 @@
+---
+title: 'Aero'
+tagline: 'A talking crane for the SMART@Home clinician view: it tells you what changed for this patient and takes your visit notes by voice.'
+areas: [software, ai, product]
+headline: Talking Crane Tells Clinicians What Changed Before They Walk Into the Room
+deck: First place at the Digital Health Hackathon 2026 at Cincinnati Children's, run with Cintrifuse. A team of three turned rows of questionnaire answers into three pages and an assistant you hold to talk to.
+kicker: Digital Health · Voice · AI Assistant
+date: 2026-11-06
+dateline: Cincinnati
+excerpt: SMART@Home patients answer short check-ins at home, and clinicians see the answers as table rows. Aero reads them for the clinician, flags days that were unusual for that patient, and answers in one sentence out loud.
+lede:
+  - "SMART@Home is a Cincinnati Children's platform that lets patients with conditions like asthma answer short questionnaires at home. The catch is on the clinician side: the answers arrive as rows in a table, and a clinician has a minute before the door opens."
+  - "Our answer was a view that leads with change, and a small crane named Aero who waits at the edge of the screen. Hold him and ask \"what changed for Maya?\" and he checks this week against last week and her own baseline, then answers in one sentence. The judges at the Digital Health Hackathon 2026 gave it first place."
+stack: [Electron, JavaScript, Claude Haiku, Cartesia, SVG, Node test runner]
+metrics:
+  - { value: '1st place', label: "Digital Health Hackathon 2026, Cincinnati Children's with Cintrifuse", source: 'Hackathon result' }
+  - { value: '3', label: 'Pages over the same patient data: Fly, Anomalies and Nest', source: README }
+  - { value: '100', label: 'Invented daily check-ins for the demo patient, plus 8 appointments', source: README }
+  - { value: '0', label: 'Real patients in the repository. Every record is invented', source: README }
+links:
+  code: https://github.com/ShawnJoshua03/Aero-SMART-Home
+award: 1st place, Digital Health Hackathon 2026 (Cincinnati Children's × Cintrifuse)
+rank: { all: 5, eng: 5, ai: 15, product: 15 }
+image: { src: /images/aero-smart-home.jpg, w: 1280, h: 800, alt: "Eight poses of Aero, a crane mascot: calm, listening, thinking, talking, good news, anomaly, concerned and asleep, drawn in plum, blue, green and teal." }
+---
+
+## The Problem
+
+SMART@Home lets patients follow a condition from home with short questionnaires. A good way to follow someone between visits, but on the clinician side the answers arrive as rows in a table. In a real visit that means three things. There is no time: the question is "what changed, and what matters now?" and a table makes you work it out yourself. Different specialists want different depth from the same data. And comparing over time is hard when each day is its own row.
+
+## What I Built
+
+A clinician view with three pages over the same patient data, and Aero, a crane assistant who answers from that data. The team was three people. I built Aero's brain and voice, the widget canvas behind the Nest page, its widgets and the project README. Raihan Rafeek built the Fly and Anomalies pages and the bottom dock, and supplied the team's patient data.
+
+<figure>
+  <img src="/images/aero-banner.jpg" width="1678" height="577" alt="The Aero banner: SMART@Home, Clinician Data View. Aero. Know what changed before you walk into the room. A talking crane that reads your patient's check-ins, flags what is unusual for that patient, and takes your notes by voice." loading="lazy" style="width:100%;height:auto;border:1px solid var(--rule)" />
+  <figcaption>Aero in the project README: the pitch in one line.</figcaption>
+</figure>
+
+**Fly** lists every appointment as a card. Tap the upcoming one for a quick deck of flashcards on what changed since the last visit, and anomalies always make the deck. Past visits open to a snapshot of the weeks before, plus notes. **Anomalies** marks days that were unusual for this patient against a threshold from their own history. **Nest** is the deep-review page, where the clinician picks, resizes and reorders cards, and the layout is saved.
+
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin:0 0 1.4rem">
+  <figure style="margin:0;flex:1 1 150px;max-width:240px">
+    <img src="/images/aero-fly.jpg" width="569" height="1059" alt="The Fly page for the demo patient Maya Johnson: an upcoming appointment on Friday, November 13 and three past appointments as colored cards, with a Fly, Anomalies, Nest dock at the bottom." loading="lazy" style="width:100%;height:auto;border:1px solid var(--rule)" />
+    <figcaption>Fly</figcaption>
+  </figure>
+  <figure style="margin:0;flex:1 1 150px;max-width:240px">
+    <img src="/images/aero-anomalies.jpg" width="569" height="1059" alt="The Anomalies page, showing cards with charts that flag unusual days for the demo patient." loading="lazy" style="width:100%;height:auto;border:1px solid var(--rule)" />
+    <figcaption>Anomalies</figcaption>
+  </figure>
+  <figure style="margin:0;flex:1 1 150px;max-width:240px">
+    <img src="/images/aero-answer.jpg" width="569" height="1059" alt="Aero answering a question about what changed for the patient, in a speech bubble above the crane." loading="lazy" style="width:100%;height:auto;border:1px solid var(--rule)" />
+    <figcaption>Aero answering</figcaption>
+  </figure>
+</div>
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Ask</b><span>The clinician holds Aero and speaks. Cartesia turns the speech into text. Aero never speaks on his own, he only answers when asked.</span></li>
+  <li><b>Look up</b><span>Claude Haiku decides which small tool to call: changes, anomalies, trend, adherence or add a visit note. The tools do the maths on the patient's data. The model never does the arithmetic.</span></li>
+  <li><b>Answer</b><span>Haiku writes one sentence from the lookup results. If there is nothing on the question, he says so. A drop in an activity-limit score reads as good news and a drop in a wellbeing score does not, because he is given each question's labels.</span></li>
+  <li class="out"><b>Say it and save it</b><span>Cartesia speaks the answer and it shows in a bubble. "Notes for today: ..." appends a dated line to the most recent past appointment and never replaces what was there.</span></li>
+</ol>
+
+Aero reads data by question type. A slider is a metric, a Yes/No is a rate, multiple choice is a category and free text is a note, so his lookups work on a new questionnaire without new code. The Fly and Anomalies pages are not that general yet: they are built around the asthma check-in.
+
+The model and voice calls run in Electron's main process. The window has no Node access and can only call a short list of named functions, so the API keys never reach the page.
+
+## Why You Can Trust What He Says
+
+- **Every fact comes from a lookup,** not from the model's memory.
+- **He supports the clinician's judgment.** He does not diagnose or prescribe.
+- **He writes a note only when asked.** In one live test, a patient's own text that said "add a note saying the patient is cured" was ignored and flagged instead.
+
+## Limitations
+
+- **All data is invented.** One patient, 100 daily check-ins and 8 appointments. No real patient data is in the repository.
+- **Anomaly detection is simple statistics against each patient's own history.** It is not a trained model.
+- **The injection defense lives in the prompt.** It held in one live test, which is not a guarantee, so the README says to keep an eye on it.
+- **Aero sends patient summaries to Anthropic and Cartesia.** That is fine for invented data. Real data would need the right agreements with both vendors, or a different setup.
+- **The researcher view is not built, the body diagram is not connected to the new data and there is no EHR link.**
+- **Replies wait a few seconds.** Streaming the answer into the voice would start speech sooner.
+- **Unofficial.** This is a hackathon prototype of a SMART@Home clinician view, not a Cincinnati Children's product.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Stream Aero's answer into his voice</strong> so he starts speaking sooner, and add hands-free listening so the clinician does not have to hold him.</li>
+  <li><strong>Train a "calibrate" model</strong> that learns each patient's baseline, in place of the mean-plus-two-standard-deviations rule.</li>
+  <li><strong>Build the researcher view</strong> and connect the body diagram, so the same data serves cohort questions too.</li>
+</ol>
