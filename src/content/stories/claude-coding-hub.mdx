@@ -1,0 +1,68 @@
+---
+title: 'claude-coding-hub'
+tagline: 'An MCP server that lets Claude Code hand work to other coding agents while a human approves every risky action.'
+areas: [software, ai]
+headline: Lead Model Gets Workers Without Getting the Keys; Every Risky Action Needs a Human Decision on the Exact Request
+deck: Codex, Gemini CLI, Grok and OpenCode run as bounded workers in their own git worktrees. There is no approve tool, so a prompt-injected lead has nothing to call.
+kicker: Developer Tools · Agent Security
+date: 2026-11-05
+dateline: Cincinnati
+excerpt: Claude Code can delegate to other agents through this local MCP server. Each worker gets a worktree, a filtered environment and its own home, and any action that could do harm becomes one human decision on the exact request, or an error.
+lede:
+  - "Letting one agent direct others is useful and risky. If the lead model can approve its workers' requests, a single injected instruction can grant itself anything. claude-coding-hub takes the approval away from the model."
+  - "Approvals are MCP form elicitations answered in the client's own UI. There is no approve tool for a lead to call. Deny ends the whole run, so a worker cannot rephrase its way past a refusal."
+stack: [TypeScript, Node.js, MCP, ACP, SQLite, Git worktrees, PowerShell]
+metrics:
+  - { value: '0', label: 'Tools a lead model can call to approve a worker request', source: README }
+  - { value: '65', label: 'Tests, covering the attacks in the threat model', source: README }
+  - { value: '2 of 5', label: 'Workers verified against their real CLIs: Codex and OpenCode', source: README }
+  - { value: '5', label: 'Worker adapters: Codex, OpenCode, Gemini CLI, Grok and OpenRouter', source: README }
+links:
+  code: https://github.com/ShawnJoshua03/claude-coding-hub
+rank: { all: 55, eng: 25, ai: 55 }
+image: { src: /images/claude-coding-hub.jpg, w: 1280, h: 800, alt: "A terminal demo of claude-coding-hub. A simulated worker's shell command is refused with: No form appeared, the hub refused it, because Gemini can show the model's description instead of the real command. An audit trail line says two tasks were recorded." }
+---
+
+## The Problem
+
+Coding agents are getting good at working in parallel, and Claude Code can already lead a team of them. The weak point is permission. A worker asks to run a command or write a file, and something has to say yes. If the lead model says yes, the safety of the whole setup is the safety of that model's prompt.
+
+## What I Built
+
+A local MCP server where Claude Code is the lead engineer and the other agents are bounded workers. Each worker gets its own git worktree on a new branch, a filtered environment and a hub-owned home directory, so it never touches your checkout or another worker. Every risky action it asks for becomes one human decision on the exact request, or an error.
+
+The flow is `start_worker`, `wait_for_worker`, `get_worker_diff` and `commit_worker_changes`, then you merge. The hub only ever commits to the worker's own branch, and it stores every request, decision and state change in SQLite so you can read the audit trail afterwards.
+
+<figure>
+  <img src="/images/claude-coding-hub.jpg" width="1280" height="800" alt="Terminal output of the claude-coding-hub demo: the approval form for a file edit, then a refused shell command with the reason." loading="lazy" style="width:100%;height:auto;border:1px solid var(--rule)" />
+  <figcaption>A replay of the repository's no-accounts demo. A simulated worker asks to run a shell command described only in its own words, and the hub refuses before anyone is asked.</figcaption>
+</figure>
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Isolate</b><span>The hub makes a worktree, filters the environment and gives the worker its own home. It pins the git directory it recorded and disables hooks, so a worker that rewrites <code>.git/hooks</code> or its <code>.git</code> pointer gains nothing.</span></li>
+  <li><b>Check the setup</b><span>Each adapter reads back the provider's effective permissions, MCP servers and approval mode, and stops before any model call if they differ from what it asked for. It fails closed on drift.</span></li>
+  <li><b>Show the real action</b><span>A permission prompt is forwarded to the human only if it carries the exact command or diff. Gemini CLI's shell prompt can carry a model-written description instead, so the hub refuses those.</span></li>
+  <li class="out"><b>Decide and record</b><span>The human answers an MCP form in the client. Allow works once. Deny stops the task. Both are written to the audit log.</span></li>
+</ol>
+
+The threat model lists each attack, the defence and the test for it, and says what remains. The most useful finding was that ACP permission prompts are not a uniform trust boundary: the same protocol shows the real command from one agent and a paraphrase from another.
+
+## Limitations
+
+- **Three workers are unverified against their real CLIs.** Gemini CLI, Grok and OpenRouter pass tests against simulated agents only. The Gemini key on the development machine was rejected by Google, and Grok has no non-interactive login.
+- **Phone approval does not work.** Claude Remote Control paired with an iPhone, but the approval forms never rendered there. Approvals happen in the desktop or terminal client.
+- **Only Codex runs in an OS sandbox.** Once you approve an action for OpenCode, Gemini or Grok, it runs as you.
+- **Windows first.** Process cleanup uses `taskkill`, and the tests have not been run on other platforms.
+- **Pinned to today's CLIs.** Checks fail closed on drift, but expect to re-verify after upgrades.
+- **Symlink refusal has no dedicated test.** Local models through Ollama are not supported, on purpose.
+- **A feasibility pilot, not a product.**
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Verify the three experimental workers</strong> against real CLIs, which needs working credentials for each.</li>
+  <li><strong>Add an OS sandbox for the other workers</strong> so an approved action cannot reach beyond its worktree.</li>
+  <li><strong>Port process cleanup and the tests beyond Windows,</strong> then try a client where approval forms render on a phone.</li>
+</ol>

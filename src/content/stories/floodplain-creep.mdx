@@ -1,0 +1,66 @@
+---
+title: 'Floodplain Creep'
+tagline: 'A map of new buildings in modeled river flood zones in Dhaka, built to show when a change is bigger than the noise.'
+areas: [ai, software]
+headline: Dhaka Flood-Zone Map Says One Neighborhood Grew Past the Noise, and Shows Its Own 55 Percent Accuracy
+deck: A solo hackathon build on open satellite building data and free flood maps. It counts only neighborhoods, hides small counts, and reports a measured accuracy that is not flattering.
+kicker: Climate · Geospatial · Data Ethics
+date: 2026-11-08
+dateline: Cincinnati
+excerpt: 'Flood-zone maps have been used to justify demolitions that rights groups say targeted poor residents. Floodplain Creep is built the other way: preparedness only, neighborhoods as the smallest unit, and every number checked in code.'
+lede:
+  - "Cities are building into their floodplains, and the people living there pay when the rains come. But flood-zone maps have also been used to justify demolitions that rights groups say targeted poor residents, with a court later ordering compensation. A map like this one can become a target list if it is careless."
+  - "So the design rules came first. The app shows neighborhoods and never single buildings, replaces any count under 20 with \"not enough data\", and uses neutral words. Then the data got the same suspicion: across Dhaka, most neighborhood changes sit inside year-to-year detection noise. Badda is the one large case that stands out."
+stack: [Python 3.12, FastAPI, PostgreSQL, rasterio, GeoPandas, Pydantic, Gemini, TypeScript, React, Vite, MapLibre GL, TanStack Query, pytest, Vitest]
+metrics:
+  - { value: '6.7×', label: "Badda's smoothed 10-year flood-zone change against the typical yearly swing across Dhaka", source: 'App, 8 Nov 2026' }
+  - { value: '55%', label: 'Accuracy of flagged increases against imagery (42 to 68% interval), on 56 test cells, AI labels not yet checked by a person', source: 'App accuracy card' }
+  - { value: '33', label: 'Dhaka neighborhoods kept to measure the typical yearly swing', source: 'App' }
+  - { value: '20', label: 'Minimum buildings before any number is shown for a neighborhood', source: 'Project rules' }
+links:
+  code: https://github.com/ShawnJoshua03/floodplain-creep
+rank: { all: 45, eng: 35, ai: 35 }
+image: { src: /images/floodplain-creep.jpg, w: 1280, h: 800, alt: "The Floodplain Creep app in dark mode: a sheet for Badda, Dhaka with a 10-year, 50-year, 100-year and 500-year flood scenario switch and a line chart of buildings in the modeled flood zone, beside a map of modeled flood depth with a one-point-seven meter person for scale." }
+---
+
+## The Problem
+
+Satellite data can now count buildings every year, and flood models can say which ground is likely to flood. Putting them together is easy. Putting them together responsibly is not. Counts from a model are relative and unstable between years, flood layers are coarse, and the same map can serve preparedness or be used to pick who to evict.
+
+## What I Built
+
+A full-bleed dark map with one floating sheet. It shows, for Badda in Dhaka, how many buildings sit in the modeled river flood zone each year from 2018 to 2023, for 10, 50, 100 and 500-year flood scenarios, with a modeled depth overlay and a one-point-seven-meter person beside the legend for scale. The sheet leads with one takeaway sentence, then the count, then a chart with a band for the usual yearly swing, and a short written brief.
+
+The data is open: Google's Open Buildings 2.5D Temporal dataset for annual building counts and the Copernicus JRC river flood hazard maps at about 90 m. Neighborhoods are thanas from geoBoundaries. I built it solo for a hackathon, and the repository is public.
+
+## How It Works
+
+<ol class="pipeline">
+  <li><b>Count</b><span>A pipeline sums fractional building counts per 100 m cell where building presence passes a threshold and the flood depth passes 0.1 m, then rolls the cells up to 33 neighborhoods. Cell-level data stays in local files and never enters the database or the API.</span></li>
+  <li><b>Suppress</b><span>One function applies the minimum count, K = 20. A change since 2018 is shown only when both years reach K, so a hidden baseline cannot be worked out. Tests read the database and check every row.</span></li>
+  <li><b>Judge the signal</b><span>The app compares the smoothed change with the typical yearly swing in the other neighborhoods and calls it clear growth only above 2 times that swing. Otherwise it says the change is within noise.</span></li>
+  <li class="out"><b>Write the brief</b><span>Gemini gets a JSON of computed numbers and writes a short paragraph. Code then checks that every number in the text appears in the input, that no banned word is used and that the length is within limit. Any failure stores a fixed template, and the page says which one you are reading.</span></li>
+</ol>
+
+## What the Numbers Say
+
+Badda's smoothed change in its 10-year flood zone is +31%, 6.7 times the typical yearly swing of about 4.8%. At 50 and 100 years it is 2.3 and 2.0 times, still clear. At 500 years it is 1.9 times, which the app labels as within noise. It shows that verdict for every scenario instead of picking the best one. A visual check of 2018 and 2023 imagery found real land conversion, including a filled pond, and also densification that the counts overstate.
+
+The app also reports its own accuracy. Against 56 held-out cells labeled from imagery, accuracy was 55%, precision 30% and recall 69%. A single 100 m cell showing more buildings is a weak sign of a new building, which is why the app works at neighborhood level and never shows cells.
+
+## Limitations
+
+- **The accuracy labels come from an AI reviewer.** A person has not audited them yet, and the app says so on the accuracy card.
+- **Counts are relative, not exact.** Totals swing with the presence threshold, and 2016 and 2017 are not used because detections are unstable.
+- **River flooding only, at about 90 m.** The modeled zone covers a wide share of the study box because of shallow depths on a coarse grid. It is a simulated scenario, not a forecast and not an official warning.
+- **One neighborhood is named.** That risks reading like a target list, so the misuse notice and limits are one click away, and the app says other neighborhoods also gained buildings.
+- **Gemini briefs fall back often.** On 8 November 3 of 4 passed the checks per run and the rest used the template, which is the checks working.
+- **Several other neighborhoods show net decreases.** That is detection noise or rebuilding, and it is not hidden.
+
+## What I'd Do Next
+
+<ol class="next-list">
+  <li><strong>Audit the labels by hand</strong> on a blind sample of 30 cells, and replace the AI labels everywhere they disagree.</li>
+  <li><strong>Add official preparedness links</strong> for the written brief, and choose hosting for a public demo.</li>
+  <li><strong>Test whether neighborhood totals hold up</strong> better than single cells, which the data suggests but has not yet shown.</li>
+</ol>

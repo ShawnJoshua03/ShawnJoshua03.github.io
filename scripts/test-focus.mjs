@@ -6,10 +6,10 @@ import assert from 'node:assert/strict';
 const B = process.env.BASE_URL ?? 'http://localhost:4321';
 // First (showcase) project for each focus, and how many projects it shows.
 const EXPECT = {
-  all: { first: 'jeremy-ai', count: 13 },
-  software: { first: 'jeremy-ai', count: 11 },
-  ai: { first: 'sepsis-early-warning', count: 6 },
-  product: { first: 'rentradar', count: 6 },
+  all: { first: 'aero-smart-home', count: 16 },
+  software: { first: 'aero-smart-home', count: 14 },
+  ai: { first: 'sepsis-early-warning', count: 9 },
+  product: { first: 'rentradar', count: 7 },
 };
 const visible = (p) =>
   p.evaluate(() =>
