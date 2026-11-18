@@ -256,8 +256,8 @@ const CATEGORIES = [
   ]},
 ];
 
-const K = 2023750999;
-const SEALED = {"13ydv9p":"14f63d8dbf891ab104bcf9981bb9bd26","16hy7em":"bcf449b4b32b86163b092e31a952f400","1dru4iv":"e87ea342d7b4c542e306c8228ac8e896","1fz5a5k":"faed2398eb07313f6033b159a617a164","1ikxzpf":"3de8b9faf569cd00501a19b1e95b3216","1rh27jo":"e3ba2ce55682e39e64e97164f2c4a1c0","7s8rkn":"1d171c9c073f00dfb81d50365a4f8bb3","e0zdb3":"1649f15430cf6c3240ef25a15c893e59","qiqt4l":"9f5e1091aab66c3928152af37286a17e","rl7qae":"14bc163b39d753965ed7130d5663111d"};
+const K = 2489096589;
+const SEALED = {"1bux93k":"10188a336cf7cd91ccfa09d4c238d0b6","1e3e3yb":"da3cc643672dd555275d124c964a66b9","1w7fg9":"14e370fc2622f5f5566850e1af40a754","ltgtne":"5bcefb9749f46f8b1a4e6b4c2ee09820","nwy6vt":"4e1292e1856c0afc675f160a06e1a794","rhywr7":"a3d08d70e77abbbf336ddc739b5c4ffd","t94a3v":"7e0b1ed2d4870241c74510bc6ed69dcc","u3ww5e":"a071f9e7759a02f09ed89324f696f12e","xi210s":"4f79819ad51bbb6c7a30287fe74412d2","y8qk1z":"41c473b30a11368124d7bd7023c6cb10"};
 function rng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function fnv(str){ let h = 0x811c9dc5; for (const b of new TextEncoder().encode(str)) { h ^= b; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
 function keystream(name, len){ const r = rng((fnv("k" + K + name) ^ K) >>> 0); return Array.from({length: len}, () => Math.floor(r() * 256)); }
@@ -326,7 +326,7 @@ const days = Math.ceil((gd - new Date()) / 864e5);
 $("countdown").textContent = days > 1 ? `⏳ ${days} days to go` : days === 1 ? "⏳ Tomorrow!" : days === 0 ? "🎉 It's gift day!" : "🎄 Gift day has passed";
 $("nameOptions").innerHTML = PEOPLE.map(n => `<option value="${esc(n)}">`).join("");
 
-const LOCK = "ss2026-me";
+const LOCK = "ss2026b-me";
 const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " ");
 const findPerson = (s) => PEOPLE.find(p => norm(p) === norm(s));
 
@@ -349,7 +349,7 @@ function show(me){
   document.querySelectorAll(".meName").forEach(el => el.textContent = me);
   scrollTo({top:0});
 
-  const list = $("chList"), pickKey = "ss2026-pick-" + me, signKey = "ss2026-signed-" + me, ideaKey = "ss2026-idea-" + me;
+  const list = $("chList"), pickKey = "ss2026b-pick-" + me, signKey = "ss2026b-signed-" + me, ideaKey = "ss2026b-idea-" + me;
   let picked = store.get(pickKey), signed = store.get(signKey);
   function render(){
     list.innerHTML = CATEGORIES.map((c, i) => `
@@ -431,7 +431,7 @@ if (saved && PEOPLE.includes(saved)) { show(saved); $("gate").classList.add("hid
       mel: "G5 1.5 F5 .5 E5 1 D5 1 | C5 1 D5 1 E5 1 C5 1 | D5 .5 E5 .5 F5 .5 D5 .5 E5 1.5 D5 .5 | C5 1 B4 1 C5 2 | G5 1.5 F5 .5 E5 1 D5 1 | C5 1 D5 1 E5 1 C5 1 | D5 .5 E5 .5 F5 .5 D5 .5 E5 1.5 D5 .5 | C5 1 B4 1 C5 2",
       bass: "C3 4 C3 4 G3 4 C3 2 G3 2 C3 4 C3 4 G3 4 C3 4" },
   ];
-  const btn = document.getElementById("music"), KEY = "ss2026-music";
+  const btn = document.getElementById("music"), KEY = "ss2026b-music";
   const pref = (() => { try { return localStorage.getItem(KEY); } catch { return null; } })();
   let ctx, master, playing = false, songIdx = 0, songEnd = 0, timer, noise;
   const midi = (n) => { const m = n.match(/^([A-G])(#?)(\d)$/); return 12 * (+m[3] + 1) + {C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]] + (m[2] ? 1 : 0); };
@@ -498,9 +498,16 @@ if (saved && PEOPLE.includes(saved)) { show(saved); $("gate").classList.add("hid
     playing ? stop() : play();
     try { localStorage.setItem(KEY, playing ? "on" : "off"); } catch {}
   });
+  // On by default. Try right away; browsers that block sound until a tap start it on the first touch.
   if (pref !== "off") {
-    const first = () => { if (!playing) play(); removeEventListener("pointerdown", first, true); removeEventListener("keydown", first, true); };
-    addEventListener("pointerdown", first, true); addEventListener("keydown", first, true);
+    play();
+    const evs = ["pointerdown", "touchstart", "keydown", "click"];
+    const first = () => {
+      if (ctx.state !== "running") ctx.resume();
+      if (!playing) play();
+      if (ctx.state === "running") evs.forEach(e => removeEventListener(e, first, true));
+    };
+    evs.forEach(e => addEventListener(e, first, true));
   }
   render();
   document.addEventListener("visibilitychange", () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (playing) ctx.resume(); });
