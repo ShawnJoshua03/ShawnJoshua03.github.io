@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Secret Santa</title>
+<meta name="description" content="Type your name to find out who you are the Secret Santa for.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f0e6; --paper:#fffaf2; --ink:#1f2a24; --muted:#5d6a62; --line:#e2d7c5;
+  --pine:#1d4d3a; --pine-2:#2f6b52; --berry:#b3263a; --berry-2:#8e1b2c; --gold:#c8962e;
+  --on-btn:#fff;
+  --shadow:0 1px 2px rgba(31,42,36,.06),0 8px 24px rgba(31,42,36,.08);
+  --snow:rgba(29,77,58,.16);
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#101a15; --paper:#17241d; --ink:#f1ebe0; --muted:#a8b5ad; --line:#2a3b32;
+    --pine:#7fc6a2; --pine-2:#9bd6b6; --berry:#ff6b7d; --berry-2:#ff8a98; --gold:#e5b95a;
+    --on-btn:#101a15; --snow:rgba(255,255,255,.55);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:700;line-height:1.15;margin:0 0 .4em}
+h1{font-size:clamp(2rem,6vw,3rem);letter-spacing:-.01em}
+h2{font-size:1.35rem}
+h3{font-size:1.05rem}
+p{margin:0 0 .8em}
+.wrap{max-width:760px;margin:0 auto;padding:32px 16px 110px;position:relative;z-index:1}
+.kicker{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--berry);font-weight:600;margin-bottom:.5em}
+.lede{color:var(--muted);font-size:1.05rem;max-width:56ch}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:20px}
+label{display:block;font-weight:500;font-size:.92rem;margin-bottom:6px}
+.hint{color:var(--muted);font-size:.86rem;margin-top:4px}
+input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus{border-color:var(--pine-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--pine-2) 25%,transparent)}
+.field{margin-bottom:14px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:999px;padding:11px 20px;cursor:pointer;background:var(--berry);color:var(--on-btn);transition:transform .1s,background .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn:hover{background:var(--berry-2)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.btn.green{background:var(--pine)}
+.btn.sm{padding:7px 14px;font-size:.88rem}
+.btn.big{padding:15px 28px;font-size:1.08rem}
+.err{color:var(--berry);font-weight:500;margin-top:10px;min-height:1.2em}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-weight:500;transition:transform .25s,opacity .25s;z-index:20;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.center{text-align:center}
+.muted{color:var(--muted)}
+.hide{display:none!important}
+.pill{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.88rem;margin:3px}
+
+/* present */
+.giftstage{display:grid;place-items:center;margin:40px 0 8px}
+.gift{position:relative;width:180px;height:170px;cursor:pointer;border:0;background:none;padding:0}
+.gift .box{position:absolute;bottom:0;left:10px;width:160px;height:115px;background:var(--berry);border-radius:8px;box-shadow:inset 0 -10px 0 rgba(0,0,0,.12)}
+.gift .lid{position:absolute;top:28px;left:0;width:180px;height:36px;background:var(--berry-2);border-radius:8px;transition:transform .6s cubic-bezier(.3,1.6,.5,1),opacity .6s;transform-origin:20% 100%;z-index:2}
+.gift .rib-v{position:absolute;left:50%;margin-left:-13px;width:26px;height:100%;background:var(--gold)}
+.gift .bow{position:absolute;top:-28px;left:50%;margin-left:-40px;width:80px;height:34px}
+.gift .bow::before,.gift .bow::after{content:"";position:absolute;top:4px;width:36px;height:26px;border:7px solid var(--gold);border-radius:50%}
+.gift .bow::before{left:0;transform:rotate(-18deg)}
+.gift .bow::after{right:0;transform:rotate(18deg)}
+.gift:hover .lid{transform:translateY(-4px) rotate(-2deg)}
+.gift.open .lid{transform:translate(-40px,-90px) rotate(-35deg);opacity:0}
+.gift.open .box{animation:shake .4s}
+@keyframes shake{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.wiggle{animation:wiggle 2.4s ease-in-out infinite}
+@keyframes wiggle{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-5deg)}90%{transform:rotate(5deg)}95%{transform:rotate(-3deg)}}
+.reveal-name{font-family:Fraunces,Georgia,serif;font-size:clamp(2.4rem,10vw,4rem);color:var(--berry);margin:.1em 0 .2em;line-height:1.05}
+.pop{animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* personal present */
+.creative{background:color-mix(in srgb,var(--gold) 14%,var(--paper));border-radius:12px;padding:10px 14px;margin:0 0 6px;font-size:.95rem}
+.challenge{display:flex;gap:14px;align-items:flex-start;text-align:left;border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px;background:var(--bg);cursor:pointer;width:100%;font:inherit;color:inherit;transition:border-color .15s}
+.challenge:hover{border-color:var(--pine-2)}
+.challenge.picked{border-color:var(--pine);background:color-mix(in srgb,var(--pine) 10%,var(--bg))}
+.challenge .ico{font-size:1.8rem;line-height:1}
+.challenge b{display:block;font-weight:600;margin-bottom:2px}
+.challenge .eg{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.challenge ul{margin:4px 0 0;padding-left:18px;color:var(--muted);font-size:.92rem}
+.challenge li{margin-bottom:2px}
+.challenge .tick{margin-left:auto;font-weight:700;color:var(--pine);visibility:hidden}
+.challenge.picked .tick{visibility:visible}
+
+/* contract */
+.contract{border:2px solid var(--ink);border-radius:6px;position:relative}
+.contract::before{content:"";position:absolute;inset:6px;border:1px solid var(--line);border-radius:3px;pointer-events:none}
+.contract h2{text-align:center;letter-spacing:.06em;text-transform:uppercase;font-size:1.15rem}
+.clause{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px dashed var(--line);font-weight:400;margin:0;cursor:pointer}
+.clause input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--pine)}
+.clause.disabled{opacity:.5;cursor:not-allowed}
+.sigline{font-family:Caveat,"Segoe Script",cursive;font-size:1.9rem;border:0!important;border-bottom:2px solid var(--ink)!important;border-radius:0!important;background:transparent!important;padding:4px 2px!important;box-shadow:none!important}
+.stamp{display:inline-block;margin-top:14px;border:3px solid var(--berry);color:var(--berry);font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:6px;transform:rotate(-6deg)}
+.nag{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));max-width:520px;margin:0 auto;z-index:15;background:var(--berry);color:var(--on-btn);border:0;border-radius:14px;padding:14px 18px;font:inherit;font-weight:600;box-shadow:var(--shadow);cursor:pointer;animation:pop .5s both}
+
+/* music */
+.music{position:fixed;top:calc(14px + env(safe-area-inset-top, 0px));right:14px;z-index:16;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow);display:grid;place-items:center}
+.music.on{border-color:var(--pine);animation:bob 1.2s ease-in-out infinite}
+.music.off::after{content:"";position:absolute;width:30px;height:2px;background:var(--berry);transform:rotate(-45deg)}
+@keyframes bob{50%{transform:translateY(-3px)}}
+
+canvas#snow{position:fixed;inset:0;pointer-events:none;z-index:0}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:10}
+footer{color:var(--muted);font-size:.85rem;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+<canvas id="confetti"></canvas>
+
+<main class="wrap center" id="ask">
+  <div class="kicker">Secret Santa 2026</div>
+  <h1>Who's opening?</h1>
+  <p class="lede" style="margin:0 auto">Type your name to find out who you're the Secret Santa for. Only enter your own name, no peeking at anyone else's!</p>
+  <section class="card" style="text-align:left;max-width:440px;margin:24px auto 0">
+    <form id="nameForm" autocomplete="off">
+      <label for="who">Your name</label>
+      <input type="text" id="who" list="nameOptions" placeholder="Start typing your name" maxlength="40">
+      <datalist id="nameOptions"></datalist>
+      <div class="err" id="err"></div>
+      <button class="btn big" type="submit" style="width:100%">Find my match</button>
+    </form>
+  </section>
+  <p style="margin-top:18px"><span class="pill">💰 Budget: <span class="budget"></span></span><span class="pill">📅 Gift day: <span class="gday"></span></span></p>
+</main>
+
+<main class="wrap hide center" id="reveal">
+  <div class="kicker">Secret Santa 2026</div>
+  <div id="gate">
+    <h1>Hi <span id="rHello"></span>!</h1>
+    <p class="lede" style="margin:0 auto">Your match is wrapped up inside. Make sure nobody's looking over your shoulder.</p>
+    <div class="giftstage">
+      <button class="gift wiggle" id="giftBtn" type="button" aria-label="Open your gift">
+        <div class="lid"><div class="rib-v"></div><div class="bow"></div></div>
+        <div class="box"><div class="rib-v"></div></div>
+      </button>
+    </div>
+    <p class="muted">Tap the present to open</p>
+    <p><button class="btn ghost sm" id="notMe" type="button">That's not me</button></p>
+  </div>
+
+  <div id="result" class="hide">
+    <p class="muted" style="margin-top:20px">You are the Secret Santa for</p>
+    <div class="reveal-name pop" id="rTarget"></div>
+    <div><span class="pill">💰 Budget: <span class="budget"></span></span><span class="pill">📅 <span class="gday"></span></span><span class="pill" id="countdown"></span></div>
+
+    <section class="card" style="text-align:left">
+      <h2>Your personal present</h2>
+      <p class="muted">On top of your <span class="budget"></span> gift, you'll make <b class="tname"></b> something yourself. Choose which kind of present it'll be:</p>
+      <p class="creative">✨ <b>These are only suggestions.</b> Be creative! Twist them, combine them, or come up with something totally your own. The best ones are made just for that person.</p>
+      <div id="chList"></div>
+      <p class="hint" id="chSaved"></p>
+      <div class="field" style="margin-top:14px">
+        <label for="myIdea">Your idea <span class="muted">(optional, only you see this)</span></label>
+        <input type="text" id="myIdea" maxlength="120" placeholder="e.g. a comic of our Goa trip">
+      </div>
+    </section>
+
+    <section class="card contract" id="contract" style="text-align:left">
+      <h2>Secret Santa Contract</h2>
+      <p class="muted center" style="font-size:.9rem">Mandatory. Binding. Legally meaningless, socially enforced.</p>
+      <p>I, <b class="meName"></b>, the Secret Santa for <b class="tname"></b>, solemnly promise that:</p>
+      <label class="clause"><input type="checkbox" class="cl"><span><b>1. The present.</b> I will get <span class="tname"></span> a gift worth <span class="budget"></span>, ready by <span class="gday"></span>.</span></label>
+      <label class="clause" id="clause2"><input type="checkbox" class="cl"><span><b>2. The personal present.</b> On top of the gift, I will make <span class="tname"></span> something personal, with my own hands. Effort counts more than talent.</span></label>
+      <label class="clause"><input type="checkbox" class="cl"><span><b>3. No snitching.</b> I won't tell anyone who I got, not <span class="tname"></span>, not the group chat, not my best friend. Not even a hint.</span></label>
+      <div id="signArea" style="margin-top:14px">
+        <label for="sig">Sign by typing your name</label>
+        <input type="text" id="sig" class="sigline" autocomplete="off" maxlength="40">
+        <div class="err" id="sigErr"></div>
+        <button class="btn green" id="signBtn" type="button" style="width:100%">Sign the contract</button>
+      </div>
+      <div id="signedArea" class="hide center">
+        <div class="sigline" id="sigShow" style="display:inline-block;min-width:60%"></div>
+        <p class="muted" style="margin:6px 0 0;font-size:.88rem">Signed <span id="sigDate"></span></p>
+        <div class="stamp">Signed &amp; sealed</div>
+      </div>
+    </section>
+  </div>
+  <footer>Made for friends, with too much tinsel.</footer>
+</main>
+
+<button class="music" id="music" type="button" aria-label="Christmas music" aria-pressed="false" title="Christmas music">🎵</button>
+<div class="toast" id="toast"></div>
+<button class="nag hide" id="nag" type="button">📝 You haven't signed the contract yet. Tap to sign.</button>
+
+<script>
+(() => {
+"use strict";
+
+const PEOPLE = ["Shawn","Harshini","Aryan","Pranay","Saqib","Dhanvi","Maaz","Abha","Raihan","Shashwat"];
+const BUDGET = "$15–20";
+const GIFT_DAY = "2026-11-27";
+
+const CATEGORIES = [
+  { ico:"🎨", name:"Art", items:[
+    "Draw a portrait of them",
+    "Draw them as a superhero, cartoon, or anime character",
+    "Paint a canvas of a place or moment that matters to them",
+    "Make a comic strip starring them and a memory you share",
+    "Design a fake movie poster or magazine cover with them as the star",
+    "Make a trading card of them with stats, special moves and a backstory",
+    "Paint a mug, tote bag, cap, or T-shirt just for them",
+    "Draw a hand-made map of their favourite places",
+  ]},
+  { ico:"🧶", name:"Craft", items:[
+    "Make a scrapbook or mini zine of moments with them",
+    "Make a coupon book of favours they can redeem next year",
+    "Make a friendship bracelet, keychain, or bookmark in their style",
+    "Build something from clay, LEGO, or cardboard that represents them",
+    "Make a homemade candle or soap in a scent they'd like",
+    "Decorate a pot and plant a small succulent or herb for them",
+    "Make a pop-up card that unfolds into something about them",
+    "Fill a jar with notes: reasons they're great, inside jokes, memories",
+  ]},
+  { ico:"📸", name:"Photo / video collage", items:[
+    "Make a photo collage of your best moments together",
+    "Edit a video montage of them set to a song they love",
+    "Collect short video messages from people who love them and edit them together",
+    "Make a fake movie trailer starring them using old photos and clips",
+    "Make a photo slideshow of their year with funny captions",
+    "Design a 2027 calendar with a photo of them for every month",
+    "Print a strip of photos and turn it into a hanging garland or wall display",
+    "Make a 'then and now' collage of them over the years",
+  ]},
+  { ico:"🍳", name:"Food", items:[
+    "Cook them a dish from their favourite cuisine",
+    "Recreate their favourite restaurant dish at home",
+    "Cook their comfort food from childhood (do some detective work)",
+    "Bake a batch of cookies and decorate each one with an inside joke",
+    "Make a tiny cake or a dessert that looks like something they love",
+    "Make a box of homemade chocolates, fudge, or brownies",
+    "Make a jar of homemade jam, chutney, or cookie dough with a custom label",
+    "Put together a snack box of their favourite treats, some homemade",
+  ]},
+  { ico:"🥤", name:"Drink", items:[
+    "Invent a mocktail or cocktail and name it after them",
+    "Blend a signature chai or coffee mix just for them",
+    "Make a jar of homemade hot chocolate mix with a custom label",
+    "Make a homemade lemonade or iced tea syrup in their favourite flavour",
+    "Create a smoothie or milkshake based on their personality",
+    "Make a bottle of fruit-infused water or punch with a label you designed",
+    "Make a cold coffee or bubble tea kit with your own recipe card",
+    "Make a hot drink kit: mug, mix and marshmallows, all wrapped by you",
+  ]},
+];
+
+const K = 2023750999;
+const SEALED = {"13ydv9p":"14f63d8dbf891ab104bcf9981bb9bd26","16hy7em":"bcf449b4b32b86163b092e31a952f400","1dru4iv":"e87ea342d7b4c542e306c8228ac8e896","1fz5a5k":"faed2398eb07313f6033b159a617a164","1ikxzpf":"3de8b9faf569cd00501a19b1e95b3216","1rh27jo":"e3ba2ce55682e39e64e97164f2c4a1c0","7s8rkn":"1d171c9c073f00dfb81d50365a4f8bb3","e0zdb3":"1649f15430cf6c3240ef25a15c893e59","qiqt4l":"9f5e1091aab66c3928152af37286a17e","rl7qae":"14bc163b39d753965ed7130d5663111d"};
+function rng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function fnv(str){ let h = 0x811c9dc5; for (const b of new TextEncoder().encode(str)) { h ^= b; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function keystream(name, len){ const r = rng((fnv("k" + K + name) ^ K) >>> 0); return Array.from({length: len}, () => Math.floor(r() * 256)); }
+function slot(name){ return fnv("i" + K + name).toString(36); }
+function unseal(name){
+  const hex = SEALED[slot(name)]; if (!hex) return null;
+  const bytes = hex.match(/../g).map(h => parseInt(h, 16)), ks = keystream(name, bytes.length);
+  return new TextDecoder().decode(Uint8Array.from(bytes, (b, i) => b ^ ks[i])).trim();
+}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1800); }
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* snow */
+(function snow(){
+  if (reduced) return;
+  const c = $("snow"), ctx = c.getContext("2d");
+  let flakes = [];
+  function size(){ c.width = innerWidth; c.height = innerHeight; flakes = Array.from({length: Math.min(70, innerWidth / 14)}, () => ({x: Math.random()*c.width, y: Math.random()*c.height, r: 1 + Math.random()*2.5, s: .3 + Math.random()*.8, d: Math.random()*6})); }
+  size(); addEventListener("resize", size);
+  (function tick(){
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--snow");
+    for (const f of flakes){
+      f.y += f.s; f.d += .01; f.x += Math.sin(f.d) * .3;
+      if (f.y > c.height) { f.y = -5; f.x = Math.random()*c.width; }
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2); ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  })();
+})();
+
+function confetti(){
+  if (reduced) return;
+  const c = $("confetti"), ctx = c.getContext("2d");
+  c.width = innerWidth; c.height = innerHeight;
+  const colors = ["#b3263a","#1d4d3a","#c8962e","#2f6b52","#ff6b7d","#f6f0e6"];
+  const bits = Array.from({length: 160}, () => ({
+    x: c.width/2, y: c.height*0.38, vx: (Math.random()-.5)*14, vy: -Math.random()*14-4,
+    w: 6+Math.random()*6, h: 8+Math.random()*8, r: Math.random()*6, vr: (Math.random()-.5)*.3,
+    col: colors[Math.floor(Math.random()*colors.length)]
+  }));
+  let frames = 0;
+  (function tick(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for (const b of bits){
+      b.vy += .35; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+      ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r); ctx.fillStyle = b.col; ctx.fillRect(-b.w/2,-b.h/2,b.w,b.h); ctx.restore();
+    }
+    if (++frames < 200) requestAnimationFrame(tick); else ctx.clearRect(0,0,c.width,c.height);
+  })();
+}
+
+/* page */
+const gd = new Date(GIFT_DAY + "T12:00:00");
+const gdText = gd.toLocaleDateString(undefined, { weekday:"long", day:"numeric", month:"long" });
+document.querySelectorAll(".budget").forEach(el => el.textContent = BUDGET);
+document.querySelectorAll(".gday").forEach(el => el.textContent = gdText);
+const days = Math.ceil((gd - new Date()) / 864e5);
+$("countdown").textContent = days > 1 ? `⏳ ${days} days to go` : days === 1 ? "⏳ Tomorrow!" : days === 0 ? "🎉 It's gift day!" : "🎄 Gift day has passed";
+$("nameOptions").innerHTML = PEOPLE.map(n => `<option value="${esc(n)}">`).join("");
+
+const LOCK = "ss2026-me";
+const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " ");
+const findPerson = (s) => PEOPLE.find(p => norm(p) === norm(s));
+
+$("nameForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const typed = $("who").value, me = findPerson(typed), err = $("err");
+  if (!me) { err.textContent = typed.trim() ? `Hmm, "${typed.trim()}" isn't on the list. Check the spelling?` : "Type your name first."; return; }
+  const locked = store.get(LOCK);
+  if (locked && locked !== me) { err.textContent = `This device already opened ${locked}'s match. No peeking at other people's!`; return; }
+  err.textContent = "";
+  show(me);
+});
+
+function show(me){
+  const t = unseal(me);
+  $("ask").classList.add("hide"); $("reveal").classList.remove("hide");
+  $("rHello").textContent = me;
+  $("rTarget").textContent = t;
+  document.querySelectorAll(".tname").forEach(el => el.textContent = t);
+  document.querySelectorAll(".meName").forEach(el => el.textContent = me);
+  scrollTo({top:0});
+
+  const list = $("chList"), pickKey = "ss2026-pick-" + me, signKey = "ss2026-signed-" + me, ideaKey = "ss2026-idea-" + me;
+  let picked = store.get(pickKey), signed = store.get(signKey);
+  function render(){
+    list.innerHTML = CATEGORIES.map((c, i) => `
+      <button type="button" class="challenge ${picked === i ? "picked" : ""}" data-i="${i}">
+        <span class="ico">${c.ico}</span>
+        <span><b>${esc(c.name)}</b><span class="eg">Suggestions</span><ul>${c.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul></span>
+        <span class="tick">✓</span>
+      </button>`).join("");
+    $("chSaved").textContent = signed ? "Locked in by your contract. Your exact idea can still evolve!"
+      : picked == null ? "Tap the kind you'll make. You can change your mind until you sign." : "Chosen. Tap another to switch, until you sign.";
+  }
+  list.onclick = e => {
+    const b = e.target.closest(".challenge"); if (!b) return;
+    if (signed) { toast("Already in the contract. No take-backs!"); return; }
+    picked = +b.dataset.i; store.set(pickKey, picked); render(); renderContract(); toast("Chosen!");
+  };
+  $("myIdea").value = store.get(ideaKey) || "";
+  $("myIdea").oninput = () => store.set(ideaKey, $("myIdea").value);
+
+  function renderContract(){
+    const has = picked != null, c2 = $("clause2").querySelector("input");
+    c2.disabled = !has; $("clause2").classList.toggle("disabled", !has);
+    if (!has) c2.checked = false;
+    $("myIdea").disabled = !!signed;
+    if (signed) {
+      document.querySelectorAll(".cl").forEach(c => { c.checked = true; c.disabled = true; });
+      $("signArea").classList.add("hide"); $("signedArea").classList.remove("hide");
+      $("sigShow").textContent = signed.name;
+      $("sigDate").textContent = new Date(signed.at).toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+    } else {
+      document.querySelectorAll(".cl").forEach(c => { if (c !== c2) c.disabled = false; });
+      $("signArea").classList.remove("hide"); $("signedArea").classList.add("hide");
+    }
+    $("nag").classList.toggle("hide", !!signed || $("result").classList.contains("hide"));
+  }
+  $("signBtn").onclick = () => {
+    const err = $("sigErr");
+    if (picked == null) { err.textContent = "Choose which kind of personal present you'll make first (scroll up)."; return; }
+    if ([...document.querySelectorAll(".cl")].some(c => !c.checked)) { err.textContent = "Tick all three promises to sign."; return; }
+    if (norm($("sig").value) !== norm(me)) { err.textContent = `Sign with your own name: ${me}.`; return; }
+    err.textContent = "";
+    signed = { name: $("sig").value.trim(), at: Date.now() };
+    store.set(signKey, signed);
+    render(); renderContract(); confetti(); toast("Contract signed. No snitching!");
+  };
+  $("nag").onclick = () => $("contract").scrollIntoView({ behavior: "smooth", block: "start" });
+  render(); renderContract();
+  show.refresh = renderContract;
+
+  const g = $("giftBtn");
+  g.className = "gift wiggle"; $("gate").classList.remove("hide"); $("result").classList.add("hide");
+  g.onclick = () => {
+    store.set(LOCK, me);
+    g.classList.remove("wiggle"); g.classList.add("open");
+    setTimeout(() => { $("gate").classList.add("hide"); $("result").classList.remove("hide"); renderContract(); confetti(); scrollTo({top:0}); }, 650);
+  };
+}
+
+$("notMe").addEventListener("click", () => {
+  $("reveal").classList.add("hide"); $("nag").classList.add("hide"); $("ask").classList.remove("hide"); $("who").value = ""; $("who").focus();
+});
+
+const saved = store.get(LOCK);
+if (saved && PEOPLE.includes(saved)) { show(saved); $("gate").classList.add("hide"); $("result").classList.remove("hide"); show.refresh(); }
+})();
+</script>
+
+<script>
+/* Music-box Christmas carols, played by the browser. All three songs are public domain. */
+(() => {
+  const SONGS = [
+    { bpm: 160, bells: true,
+      mel: "E5 1 E5 1 E5 2 | E5 1 E5 1 E5 2 | E5 1 G5 1 C5 1.5 D5 .5 | E5 4 | F5 1 F5 1 F5 1.5 F5 .5 | F5 1 E5 1 E5 1 E5 .5 E5 .5 | E5 1 D5 1 D5 1 E5 1 | D5 2 G5 2 | E5 1 E5 1 E5 2 | E5 1 E5 1 E5 2 | E5 1 G5 1 C5 1.5 D5 .5 | E5 4 | F5 1 F5 1 F5 1.5 F5 .5 | F5 1 E5 1 E5 1 E5 .5 E5 .5 | G5 1 G5 1 F5 1 D5 1 | C5 4",
+      bass: "C3 4 C3 4 C3 4 C3 4 F3 4 C3 4 D3 4 G3 4 C3 4 C3 4 C3 4 C3 4 F3 4 C3 4 G3 4 C3 4" },
+    { bpm: 150,
+      mel: "D5 1 | G5 1 G5 .5 A5 .5 G5 .5 F#5 .5 | E5 1 E5 1 E5 1 | A5 1 A5 .5 B5 .5 A5 .5 G5 .5 | F#5 1 D5 1 D5 1 | B5 1 B5 .5 C6 .5 B5 .5 A5 .5 | G5 1 E5 1 D5 .5 D5 .5 | E5 1 A5 1 F#5 1 | G5 3",
+      bass: "R 1 G3 3 C3 3 D3 3 D3 3 E3 3 C3 3 D3 3 G3 3" },
+    { bpm: 140,
+      mel: "G5 1.5 F5 .5 E5 1 D5 1 | C5 1 D5 1 E5 1 C5 1 | D5 .5 E5 .5 F5 .5 D5 .5 E5 1.5 D5 .5 | C5 1 B4 1 C5 2 | G5 1.5 F5 .5 E5 1 D5 1 | C5 1 D5 1 E5 1 C5 1 | D5 .5 E5 .5 F5 .5 D5 .5 E5 1.5 D5 .5 | C5 1 B4 1 C5 2",
+      bass: "C3 4 C3 4 G3 4 C3 2 G3 2 C3 4 C3 4 G3 4 C3 4" },
+  ];
+  const btn = document.getElementById("music"), KEY = "ss2026-music";
+  const pref = (() => { try { return localStorage.getItem(KEY); } catch { return null; } })();
+  let ctx, master, playing = false, songIdx = 0, songEnd = 0, timer, noise;
+  const midi = (n) => { const m = n.match(/^([A-G])(#?)(\d)$/); return 12 * (+m[3] + 1) + {C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]] + (m[2] ? 1 : 0); };
+  const hz = (n) => 440 * Math.pow(2, (midi(n) - 69) / 12);
+  const parse = (str) => { const t = str.replace(/\|/g, " ").trim().split(/\s+/), out = []; for (let i = 0; i < t.length; i += 2) out.push([t[i], +t[i + 1]]); return out; };
+  function setup(){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0;
+    const delay = ctx.createDelay(), fb = ctx.createGain(), wet = ctx.createGain();
+    delay.delayTime.value = .24; fb.gain.value = .28; wet.gain.value = .22;
+    master.connect(ctx.destination); master.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(ctx.destination);
+  }
+  function tone(freq, t, len, vol, type){
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .006); g.gain.exponentialRampToValueAtTime(.0008, t + len);
+    g.connect(master);
+    const parts = type === "bass" ? [[1, 1, "triangle"]] : [[1, 1, "sine"], [2, .28, "sine"], [3.01, .07, "sine"]];
+    for (const [mul, amp, wave] of parts){
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = wave; o.frequency.value = freq * mul; og.gain.value = amp;
+      o.connect(og); og.connect(g); o.start(t); o.stop(t + len + .05);
+    }
+  }
+  function bell(t){
+    if (!noise){ noise = ctx.createBuffer(1, ctx.sampleRate * .2, ctx.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = noise; f.type = "highpass"; f.frequency.value = 7000;
+    g.gain.setValueAtTime(.05, t); g.gain.exponentialRampToValueAtTime(.001, t + .15);
+    src.connect(f); f.connect(g); g.connect(master); src.start(t);
+  }
+  function schedule(){
+    const song = SONGS[songIdx % SONGS.length]; songIdx++;
+    const beat = 60 / song.bpm, start = Math.max(ctx.currentTime + .1, songEnd);
+    let t = start;
+    for (const [n, b] of parse(song.mel)){ if (n !== "R") tone(hz(n), t, Math.max(b * beat, .5) + .9, .16, "mel"); t += b * beat; }
+    let tb = start;
+    for (const [n, b] of parse(song.bass)){ if (n !== "R") tone(hz(n), tb, b * beat + .3, .09, "bass"); tb += b * beat; }
+    if (song.bells) for (let x = start; x < t; x += beat) bell(x);
+    songEnd = t + beat * 2;
+  }
+  function tick(){ if (ctx.currentTime > songEnd - 1.5) schedule(); }
+  function play(){
+    if (!ctx) setup();
+    ctx.resume();
+    if (ctx.currentTime > songEnd - 1.5) { songEnd = 0; schedule(); }
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setTargetAtTime(.9, ctx.currentTime, .3);
+    clearInterval(timer); timer = setInterval(tick, 250);
+    playing = true; render();
+  }
+  function stop(){
+    if (!ctx) return;
+    master.gain.setTargetAtTime(0, ctx.currentTime, .15);
+    clearInterval(timer);
+    setTimeout(() => { if (!playing) ctx.suspend(); }, 600);
+    playing = false; render();
+  }
+  function render(){
+    btn.classList.toggle("on", playing); btn.classList.toggle("off", !playing);
+    btn.setAttribute("aria-pressed", playing); btn.title = playing ? "Turn music off" : "Turn music on";
+  }
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    playing ? stop() : play();
+    try { localStorage.setItem(KEY, playing ? "on" : "off"); } catch {}
+  });
+  if (pref !== "off") {
+    const first = () => { if (!playing) play(); removeEventListener("pointerdown", first, true); removeEventListener("keydown", first, true); };
+    addEventListener("pointerdown", first, true); addEventListener("keydown", first, true);
+  }
+  render();
+  document.addEventListener("visibilitychange", () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (playing) ctx.resume(); });
+})();
+</script>
+</body>
+</html>
